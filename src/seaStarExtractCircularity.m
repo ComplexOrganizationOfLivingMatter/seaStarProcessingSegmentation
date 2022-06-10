@@ -51,7 +51,13 @@ function [cells3dFeatures] = seaStarExtractCircularity(originalImgPath,segmented
     [indexEmpty,~]=find(isnan(cellProps.Centroid));
     cellProps(indexEmpty,:)=[];
     
-    sliceFactor=round(185/z_Scale); %Selecting 185 microns because we selected in the first movie 20200114_pos1 this space.
+    for zIndex=1:size(segmentedImageResized,3)
+       if max(max(max(segmentedImageResized(:,:,zIndex))))>0 
+           break
+       end
+    end
+    
+    sliceFactor=round((142+(zIndex)*z_Scale)/z_Scale); %Selecting 142 microns from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
     noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
     
