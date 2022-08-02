@@ -8,22 +8,26 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
         %% Cellular features 
         [apical3dInfo] = calculateNeighbours3D(apicalLayer, dilatedVx, apicalLayer == 0);
         
-        if size(apical3dInfo.neighbourhood,1) ~= size(lateral3dInfo_total',1)
+        if size(apical3dInfo.neighbourhood,1) < size(lateral3dInfo_total',1)
             for nCell=size(apical3dInfo.neighbourhood,1)+1:size(lateral3dInfo_total',1)
                 apical3dInfo.neighbourhood{nCell}=[];
                 
             end
+        elseif size(apical3dInfo.neighbourhood,1) > size(lateral3dInfo_total',1)
+            apical3dInfo.neighbourhood=apical3dInfo.neighbourhood(1:size(lateral3dInfo_total,2),1);
         end
-        
+      
         apical3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo_total,apical3dInfo.neighbourhood','UniformOutput',false);
         
         [basal3dInfo] = calculateNeighbours3D(basalLayer, dilatedVx, basalLayer == 0);
         
-        if size(basal3dInfo.neighbourhood,1) ~= size(lateral3dInfo_total',1)
+        if size(basal3dInfo.neighbourhood,1) < size(lateral3dInfo_total',1)
             for nCell=size(basal3dInfo.neighbourhood,1)+1:size(lateral3dInfo_total',1)
-                basal3dInfo.neighbourhood{nCell}=[];
-                
+                basal3dInfo.neighbourhood{nCell}=[]; 
             end
+            
+        elseif size(basal3dInfo.neighbourhood,1) > size(lateral3dInfo_total',1)
+            basal3dInfo.neighbourhood=basal3dInfo.neighbourhood(1:size(lateral3dInfo_total,2),1);
         end
         
         

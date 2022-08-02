@@ -9,7 +9,15 @@ function cell_heights = calculateCellHeight(apicalLayer, basalLayer)
     cell_heights = nan(size(centroidsApical,1),1);
     
     if size(centroidsBasal,1)<size(centroidsApical,1)
-        centroidsBasal=[centroidsBasal;NaN NaN NaN];
+        for nCell=size(centroidsBasal,1)+1:size(centroidsApical,1)
+             centroidsBasal=[centroidsBasal;NaN NaN NaN];
+        end
+    end
+    
+    if size(centroidsApical,1)<size(centroidsBasal,1)
+        for nCell=size(centroidsApical,1)+1:size(centroidsBasal,1)
+             centroidsApical=[centroidsApical;NaN NaN NaN];
+        end
     end
 
     for idCell = 1:length(cell_heights)
