@@ -50,8 +50,7 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     
 
     cellProps = regionprops3(segmentedImageResized, "Centroid");
-    [indexEmpty,~]=find(isnan(cellProps.Centroid));
-    cellProps(indexEmpty,:)=[];
+
     
     for zIndex=1:size(segmentedImageResized,3)
        if max(max(max(segmentedImageResized(:,:,zIndex))))>0 
@@ -59,8 +58,17 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
        end
     end
     
-    sliceFactor=round((142+(zIndex)*z_Scale)/z_Scale); %Selecting 142 microns from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
+    %% Select z distance to select valid cells
+    zDistance=142;
+%     zDistance=150;
+    
+    
+    sliceFactor=round((zDistance+(zIndex)*z_Scale)/z_Scale); %Selecting zDistance from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
     noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
+    
+    [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
+    noValidCells=unique([noValidCells; indexEmpty]);
+    
     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
 
     [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
@@ -70,14 +78,12 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,contactThreshold,validCells,noValidCells);
 
     
-%     segmentedImageResizedValidCells=segmentedImageResized;
-    
-    
-    
-%     for nCell=1:length(indexCells)
-%         segmentedImageResizedValidCells(segmentedImageResized==indexCells(nCell))=0;
+%     segmentedImageResizedValidCells=labelledImage_realSize;
+%     
+%     for nCell=1:length(noValidCells)
+%         segmentedImageResizedValidCells(segmentedImageResizedValidCells==noValidCells(nCell))=0;
 %     end
-    
+%     
 
 
    
