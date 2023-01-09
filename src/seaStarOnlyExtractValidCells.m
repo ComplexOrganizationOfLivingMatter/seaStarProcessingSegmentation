@@ -1,4 +1,4 @@
-function [totalCells,validCells] = seaStarOnlyValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
+function [totalCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
    
 
     [segmentedImage] = readStackTif(strcat(segmentedPath,'\',segmentedImageName));
@@ -61,7 +61,19 @@ function [totalCells,validCells] = seaStarOnlyValidCells(originalImgPath,segment
     
     sliceFactor=round((142+(zIndex)*z_Scale)/z_Scale); %Selecting 142 microns from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
     noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
+    
     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
+    
+    distXPixels= max(cellProps.Centroid(validCells(:),1)) - min(cellProps.Centroid(validCells(:),1));
+    distXmicrons=distXPixels*pixel_Scale;
+    
+    distYPixels= max(cellProps.Centroid(validCells(:),2)) - min(cellProps.Centroid(validCells(:),2));
+    distYmicrons=distYPixels*pixel_Scale;
+    
+    if distXmicrons > 200 || distYmicrons > 200
+        disp(imageName);
+    end
+    
     validCells=length(validCells);
     totalCells=max(max(max(segmentedImageResized)));
 %     [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
@@ -74,17 +86,16 @@ function [totalCells,validCells] = seaStarOnlyValidCells(originalImgPath,segment
 %     segmentedImageResizedValidCells=segmentedImageResized;
     
     
+    for nCell=1:length(noValidCells)
+        segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
+    end
     
-%     for nCell=1:length(indexCells)
-%         segmentedImageResizedValidCells(segmentedImageResized==indexCells(nCell))=0;
-%     end
     
-
 
    
 
 
-
+    save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale','sliceFactor','cellProps');
     
     
 end
