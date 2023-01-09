@@ -1,4 +1,4 @@
-function [totalCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
+function [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
    
 
     [segmentedImage] = readStackTif(strcat(segmentedPath,'\',segmentedImageName));
@@ -48,10 +48,12 @@ function [totalCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtr
     
     [segmentedImageResized] = relabelMulticutTiff(segmentedImageResized);
     
+    segmentedImageResized=segmentedImageResized+1;
+    segmentedImageResized(segmentedImageResized==1)=0;
 
     cellProps = regionprops3(segmentedImageResized, "Centroid");
-    [indexEmpty,~]=find(isnan(cellProps.Centroid));
-    cellProps(indexEmpty,:)=[];
+%     [indexEmpty,~]=find(isnan(cellProps.Centroid));
+%     cellProps(indexEmpty,:)=[];
     
     for zIndex=1:size(segmentedImageResized,3)
        if max(max(max(segmentedImageResized(:,:,zIndex))))>0 
@@ -59,8 +61,15 @@ function [totalCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtr
        end
     end
     
-    sliceFactor=round((142+(zIndex)*z_Scale)/z_Scale); %Selecting 142 microns from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
+  %% Select z distance to select valid cells
+    zDistance=142;
+%     zDistance=150;
+    
+    sliceFactor=round((zDistance+(zIndex)*z_Scale)/z_Scale); %Selecting zDistance from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
     noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
+    
+    [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
+    noValidCells=unique([noValidCells; indexEmpty]);
     
     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
     
@@ -74,8 +83,9 @@ function [totalCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtr
         disp(imageName);
     end
     
-    validCells=length(validCells);
-    totalCells=max(max(max(segmentedImageResized)));
+    
+    numberValidCells=length(validCells);
+    totalCells=max(max(max(segmentedImageResized)))-length(indexEmpty);
 %     [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
 %     
 %     contactThreshold = 0.5;
@@ -84,7 +94,6 @@ function [totalCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtr
 
     
 %     segmentedImageResizedValidCells=segmentedImageResized;
-    
     
     for nCell=1:length(noValidCells)
         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;

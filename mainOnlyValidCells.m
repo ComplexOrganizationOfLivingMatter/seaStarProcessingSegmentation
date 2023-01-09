@@ -28,10 +28,10 @@ for nEmbryos=1:length(embryosFiles)
     
     originalImagePath = originalEmbryosFiles.folder;
     segmentPath = segmentedEmbryosFiles.folder;
-    if exist(fullfile(segmentPath, 'segmentedImageResized')) ~=7
-        mkdir(segmentPath,'segmentedImageResized');
+    if exist(fullfile(segmentPath,strcat('segmentedImageResized_',date))) ~=7
+        mkdir(segmentPath,strcat('segmentedImageResized_',date));
     end
-    outPath=strcat(segmentPath,'\segmentedImageResized\');
+    outPath=strcat(segmentPath,'\segmentedImageResized_',date,'\');
     
     for nFiles=1:length(segmentedEmbryosFiles)
 
@@ -44,18 +44,18 @@ for nEmbryos=1:length(embryosFiles)
             mkdir(segmentPath, fileName{1})
 
         end
-        [totalCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtractValidCells(originalImagePath,segmentPath,imageName,segmentName);
+        [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtractValidCells(originalImagePath,segmentPath,imageName,segmentName);
         
        allGeneralInfo{nFiles,1} =  fileName{1};
        allGeneralInfo{nFiles,2} = totalCells;
-       allGeneralInfo{nFiles,3} = validCells;
+       allGeneralInfo{nFiles,3} = numberValidCells;
 
        writeStackTif(uint16(segmentedImageResized),fullfile(outPath,strcat(fileName{1},'.tiff')))
        
        segmentedImageResized=relabelMulticutTiff(segmentedImageResized);
        segmentedImageResized=imresize3(segmentedImageResized,[size(segmentedImageResized,1)/4 size(segmentedImageResized,2)/4 size(segmentedImageResized,3)*z_Scale/4],'nearest');
        
-        paint3D(segmentedImageResized, validCells,colours, 3);
+        paint3D(segmentedImageResized, numberValidCells,colours, 3);
         material([0.5 0.2 0.0 10 1])
         fig = get(groot,'CurrentFigure');
         fig.Color = [1 1 1];
