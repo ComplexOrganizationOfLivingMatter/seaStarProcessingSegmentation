@@ -1,4 +1,4 @@
-function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surfaceRatio3D, validCells, apicoBasalNeighs] = obtain3DFeatures(labelledImage,apicalLayer,basalLayer,lateralLayer,validCells,noValidCells,path2save,contactThreshold)
+function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surfaceRatio3D, validCells] = obtain3DFeatures(labelledImage,apicalLayer,basalLayer,lateralLayer,validCells,noValidCells,path2save,contactThreshold)
     if ~exist(fullfile(path2save, 'morphological3dFeatures.mat'),'file')
        
         %% (default se = 3)
@@ -55,10 +55,10 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
             validCells=unique([validCells(:);extraValidCells(:)])';
             disp(['Added as valid cell: ' num2str([extraValidCells(:)]')])
         end
-        noValidCells(ismember(noValidCells,missingCells))=[];
+%         noValidCells(ismember(noValidCells,missingCells))=[];
         numValidCells = length(validCells);
 
-        
+        validCells=validCells';
         %% Obtain cells descriptors
         % get apical, basal and lateral sides cells. Areas and cell Volume
         [cellularFeaturesValidCells,CellularFeaturesAllCells,surfaceRatio3D] = calculate_CellularFeatures(apicalLayer,basalLayer,labelledImage,totalLateralCellsArea,absoluteLateralContacts,noValidCells,validCells);

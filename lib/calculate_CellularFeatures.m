@@ -56,7 +56,7 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio]
     end
 
     %%  Export to a excel file
-    ID_cells=(1:length(basal3dInfo)).';
+    ID_cells=unique([validCells; noValidCells]);
     CellularFeaturesAllCells=table(ID_cells,apical_area_cells,basal_area_cells,lateral_area_cells, average_lateral_wall, std_lateral_wall, volume_cells,cell_heights);
     CellularFeaturesAllCells.Properties.VariableNames = {'ID_Cell','Apical_area','Basal_area','Lateral_area','Average_cell_wall_area', 'Std_cell_wall_area', 'Volume','Cell_height'};
 
