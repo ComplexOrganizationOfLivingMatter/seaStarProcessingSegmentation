@@ -48,16 +48,16 @@ for nEmbryos=1:length(embryosFiles)
             
         end
         
-        [volume,validCells] = seaStarExtractDensity(originalImagePath,segmentPath,imageName,segmentName);
-   
+        [volume,basalArea,apicalArea,holeArea,validCells] = seaStarExtractDensity(originalImagePath,segmentPath,imageName,segmentName);
+           
 %         writeStackTif(uint16(holeProjection),fullfile(outPath,strcat(fileName{1},'.tiff')))
 %          
-        allMeanCellsFeatures{nFiles,1} = length(validCells);
-        allMeanCellsFeatures{nFiles,2} = volume;
-        allMeanCellsFeatures{nFiles,3} = length(validCells)/volume;
+        allMeanCellsFeatures{nFiles,1} = apicalArea;
+        allMeanCellsFeatures{nFiles,2} = basalArea;
+        allMeanCellsFeatures{nFiles,3} = holeArea;
         allMeanCellsFeatures{nFiles,4} = {originalEmbryosFiles(nFiles).name};
     end
     
-    writetable(cell2table(allMeanCellsFeatures),[strcat(embryosFiles(nEmbryos).folder,'\'),embryosFiles(nEmbryos).name,'_','density_3dFeatures_' date '.xls'],'Sheet', 'meanCellParameters','Range','B2');
+    writetable(cell2table(allMeanCellsFeatures),[strcat(embryosFiles(nEmbryos).folder,'\'),embryosFiles(nEmbryos).name,'_','regionsArea_3dFeatures_' date '.xls'],'Sheet', 'meanCellParameters','Range','B2');
     
 end
