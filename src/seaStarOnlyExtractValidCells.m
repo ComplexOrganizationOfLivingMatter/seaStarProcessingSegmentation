@@ -46,10 +46,10 @@ function [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale] 
     segmentedImage=double(segmentedImage);
     segmentedImageResized= imresize3(segmentedImage, [size(originalImage,1),size(originalImage,2),size(originalImage,3)],'nearest');
     
-    [segmentedImageResized] = relabelMulticutTiff(segmentedImageResized);
-    
-    segmentedImageResized=segmentedImageResized+1;
-    segmentedImageResized(segmentedImageResized==1)=0;
+%     [segmentedImageResized] = relabelMulticutTiff(segmentedImageResized);
+%     
+%     segmentedImageResized=segmentedImageResized+1;
+%     segmentedImageResized(segmentedImageResized==1)=0;
 
     cellProps = regionprops3(segmentedImageResized, "Centroid");
 %     [indexEmpty,~]=find(isnan(cellProps.Centroid));

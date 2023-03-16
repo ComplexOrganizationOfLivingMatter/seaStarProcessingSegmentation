@@ -1,4 +1,4 @@
-function [volume,validCells] = seaStarExtractDensity(originalImgPath,segmentedPath,imageName,segmentedImageName)
+function [volume,basalArea,apicalArea,holeArea,validCells] = seaStarExtractDensity(originalImgPath,segmentedPath,imageName,segmentedImageName)
    
 
     [segmentedImage] = readStackTif(strcat(segmentedPath,'\',segmentedImageName));
@@ -65,20 +65,26 @@ function [volume,validCells] = seaStarExtractDensity(originalImgPath,segmentedPa
   %% Select z distance to select valid cells
     zDistance=142; %distancia en pixeles
 %     zDistance=150;
-    xDistance=50; %distancia en micras
+%     xDistance=50; %distancia en micras
     
 
+
+
+    contactThreshold=0.5;
     sliceFactor=round((zDistance+(zIndex)*z_Scale)/z_Scale); %Selecting zDistance from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
+    noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
 
-    XYFactor=xDistance/pixel_Scale;
+    [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
+    noValidCells=unique([noValidCells; indexEmpty]);
+%     XYFactor=xDistance/pixel_Scale;
     
-    validCells=find( round(cellProps.Centroid(:,3))<=sliceFactor & cellProps.Centroid(:,1) > (embryoCentroid.Centroid(1)-XYFactor) & cellProps.Centroid(:,1) <(embryoCentroid.Centroid(1)+XYFactor) & cellProps.Centroid(:,2)> (embryoCentroid.Centroid(2)-XYFactor) & cellProps.Centroid(:,2)<(embryoCentroid.Centroid(2)+XYFactor));
-    
+%     validCells=find( round(cellProps.Centroid(:,3))<=sliceFactor & cellProps.Centroid(:,1) > (embryoCentroid.Centroid(1)-XYFactor) & cellProps.Centroid(:,1) <(embryoCentroid.Centroid(1)+XYFactor) & cellProps.Centroid(:,2)> (embryoCentroid.Centroid(2)-XYFactor) & cellProps.Centroid(:,2)<(embryoCentroid.Centroid(2)+XYFactor));
+%     
     
 %     [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
 %     noValidCells=unique([noValidCells; indexEmpty]);
     
-    noValidCells=setdiff(1:max(max(max(segmentedImageResized))),validCells);
+     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
     
 %     distXPixels= max(cellProps.Centroid(validCells(:),1)) - min(cellProps.Centroid(validCells(:),1));
 %     distXmicrons=distXPixels*pixel_Scale;
@@ -94,7 +100,7 @@ function [volume,validCells] = seaStarExtractDensity(originalImgPath,segmentedPa
         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=0;
     end
 
-   [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissueRegion(segmentedPath,outputName{1},segmentedImageResized);
+   [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
     
     volumeRegion=regionprops3(labelledImage_realSize>0,'Volume');
 
@@ -112,20 +118,20 @@ function [volume,validCells] = seaStarExtractDensity(originalImgPath,segmentedPa
 
 
 
-%     for nCell=1:length(noValidCells)
-%         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
-%     end
+    for nCell=1:length(noValidCells)
+        segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
+    end
   
-%         [holeArea,holeProjection] = extractEmbryoArea(segmentedImageResized);
+        [holeArea,holeProjection] = extractEmbryoArea(segmentedImageResized);
     
-%         load(strcat(segmentedPath,'\morphological3dFeatures.mat'))
+        load(strcat(segmentedPath,'\morphological3dFeatures.mat'))
 %         find(CellularFeaturesAllCells)
-%         apicalArea=sum(cellularFeaturesValidCells.Apical_area);
-%         BasalArea=sum(cellularFeaturesValidCells.Basal_area);
-%         volume=sum(cellularFeaturesValidCells.Volume);
+        apicalArea=sum(cellularFeaturesValidCells.Apical_area);
+        BasalArea=sum(cellularFeaturesValidCells.Basal_area);
+        volume=sum(cellularFeaturesValidCells.Volume);
         apicalArea=apicalArea*(pixel_Scale^2);
-        BasalArea=BasalArea*(pixel_Scale^2);
+        basalArea=BasalArea*(pixel_Scale^2);
         holeArea=holeArea*(pixel_Scale^2);
-        volume=volumeRegion.Volume *(pixel_Scale^3);
+        volume=volume *(pixel_Scale^3);
 end
 
