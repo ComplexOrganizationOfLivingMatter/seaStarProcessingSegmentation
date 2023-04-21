@@ -1,4 +1,4 @@
-function [volume,basalArea,apicalArea,holeArea,validCells] = seaStarExtractDensity(originalImgPath,segmentedPath,imageName,segmentedImageName)
+function [volume,basalArea,apicalArea,holeArea,holeProjection,validCells] = seaStarExtractDensity(originalImgPath,segmentedPath,imageName,segmentedImageName)
    
 
     [segmentedImage] = readStackTif(strcat(segmentedPath,'\',segmentedImageName));
@@ -51,8 +51,8 @@ function [volume,basalArea,apicalArea,holeArea,validCells] = seaStarExtractDensi
     segmentedImageResized=segmentedImageResized+1;
     segmentedImageResized(segmentedImageResized==1)=0;
 
-    cellProps = regionprops3(segmentedImageResized, "Centroid");
-    embryoCentroid = regionprops3(segmentedImageResized>0, "Centroid");
+%     cellProps = regionprops3(segmentedImageResized, "Centroid");
+%     embryoCentroid = regionprops3(segmentedImageResized>0, "Centroid");
 %     [indexEmpty,~]=find(isnan(cellProps.Centroid));
 %     cellProps(indexEmpty,:)=[];
     
@@ -63,28 +63,9 @@ function [volume,basalArea,apicalArea,holeArea,validCells] = seaStarExtractDensi
     end
     
   %% Select z distance to select valid cells
-    zDistance=142; %distancia en pixeles
+%     zDistance=142; %distancia en pixeles
 %     zDistance=150;
-%     xDistance=50; %distancia en micras
-    
 
-
-
-    contactThreshold=0.5;
-    sliceFactor=round((zDistance+(zIndex)*z_Scale)/z_Scale); %Selecting zDistance from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
-    noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
-
-    [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
-    noValidCells=unique([noValidCells; indexEmpty]);
-%     XYFactor=xDistance/pixel_Scale;
-    
-%     validCells=find( round(cellProps.Centroid(:,3))<=sliceFactor & cellProps.Centroid(:,1) > (embryoCentroid.Centroid(1)-XYFactor) & cellProps.Centroid(:,1) <(embryoCentroid.Centroid(1)+XYFactor) & cellProps.Centroid(:,2)> (embryoCentroid.Centroid(2)-XYFactor) & cellProps.Centroid(:,2)<(embryoCentroid.Centroid(2)+XYFactor));
-%     
-    
-%     [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
-%     noValidCells=unique([noValidCells; indexEmpty]);
-    
-     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
     
 %     distXPixels= max(cellProps.Centroid(validCells(:),1)) - min(cellProps.Centroid(validCells(:),1));
 %     distXmicrons=distXPixels*pixel_Scale;
@@ -96,14 +77,24 @@ function [volume,basalArea,apicalArea,holeArea,validCells] = seaStarExtractDensi
 %         disp(imageName);
 %     end
 %     
-    for nCell=1:length(noValidCells)
-        segmentedImageResized(segmentedImageResized==noValidCells(nCell))=0;
-    end
-
+%     for nCell=1:length(noValidCells)
+%         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=0;
+%     end
+% 
    [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
-    
-    volumeRegion=regionprops3(labelledImage_realSize>0,'Volume');
+%     
+%     volumeRegion=regionprops3(labelledImage_realSize>0,'Volume');
 
+        zDistance=30; %30 microns
+        zThreshold=(zDistance/pixel_Scale)+(zIndex*z_Scale); %Selecting zDistance from the first slice with cells
+        cellProps = regionprops3(labelledImage_realSize, "Centroid");
+        
+        noValidCells=find(round(cellProps.Centroid(:,3))>zThreshold);
+        
+        [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
+        noValidCells=unique([noValidCells; indexEmpty]);
+        
+        validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
 
 %     numberValidCells=length(validCells);
 %     totalCells=max(max(max(segmentedImageResized)))-length(indexEmpty);
@@ -118,11 +109,11 @@ function [volume,basalArea,apicalArea,holeArea,validCells] = seaStarExtractDensi
 
 
 
-    for nCell=1:length(noValidCells)
-        segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
-    end
+%     for nCell=1:length(noValidCells)
+%         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
+%     end
   
-        [holeArea,holeProjection] = extractEmbryoArea(segmentedImageResized);
+        [holeArea,holeProjection] = extractEmbryoArea(labelledImage_realSize);
     
         load(strcat(segmentedPath,'\morphological3dFeatures.mat'))
 %         find(CellularFeaturesAllCells)
