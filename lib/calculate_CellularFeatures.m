@@ -23,19 +23,31 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio]
     lateral_area_cells = totalLateralCellsArea;
     
     if size(apical_area_cells,1) ~= size(lateral_area_cells,1)
-        for nCell=size(apical_area_cells,1)+1:size(lateral_area_cells,1)
-            apical_area_cells(nCell,1)=0;
+        if size(apical_area_cells,1) < size(lateral_area_cells,1)
+            for nCell=size(apical_area_cells,1)+1:size(lateral_area_cells,1)
+                apical_area_cells(nCell,1)=0;
+            end
+        else
+            for nCell=size(lateral_area_cells,1)+1:size(apical_area_cells,1)
+                lateral_area_cells(nCell,1)=0;
+            end
         end
     end
     
-     if size(basal_area_cells,1) ~= size(lateral_area_cells,1)
-        for nCell=size(basal_area_cells,1)+1:size(lateral_area_cells,1)
-            basal_area_cells(nCell,1)=0;
+    if size(basal_area_cells,1) ~= size(lateral_area_cells,1)
+        if size(basal_area_cells,1) < size(lateral_area_cells,1)
+            for nCell=size(basal_area_cells,1)+1:size(lateral_area_cells,1)
+                basal_area_cells(nCell,1)=0;
+            end
+        else
+            for nCell=size(lateral_area_cells,1)+1:size(basal_area_cells,1)
+                lateral_area_cells(nCell,1)=0;
+            end
         end
-     end
+    end
     
-    average_lateral_wall = cellfun(@mean, absoluteLateralContacts);
-    std_lateral_wall = cellfun(@std, absoluteLateralContacts);
+    average_lateral_wall = zeros(size(apical_area_cells,1),1);
+    std_lateral_wall = zeros(size(apical_area_cells,1),1);
     
     meanSurfaceRatio = sum(basal_area_cells(validCells)) / sum(apical_area_cells(validCells));
 
@@ -59,7 +71,7 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio]
     ID_cells=unique([validCells; noValidCells]);
     CellularFeaturesAllCells=table(ID_cells,apical_area_cells,basal_area_cells,lateral_area_cells, average_lateral_wall, std_lateral_wall, volume_cells,cell_heights);
     CellularFeaturesAllCells.Properties.VariableNames = {'ID_Cell','Apical_area','Basal_area','Lateral_area','Average_cell_wall_area', 'Std_cell_wall_area', 'Volume','Cell_height'};
-
+    
     CellularFeaturesValidCells = CellularFeaturesAllCells(validCells,:);
 end
 
