@@ -44,16 +44,17 @@ for nEmbryos=1:length(embryosFiles)
             mkdir(segmentPath, fileName{1})
 
         end
-        [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtractValidCells(originalImagePath,segmentPath,imageName,segmentName);
+        [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale,pixel_Scale] = seaStarOnlyExtractValidCells(originalImagePath,segmentPath,imageName,segmentName);
         
        allGeneralInfo{nFiles,1} =  fileName{1};
        allGeneralInfo{nFiles,2} = totalCells;
        allGeneralInfo{nFiles,3} = numberValidCells;
-
-       writeStackTif(uint16(segmentedImageResized),fullfile(outPath,strcat(fileName{1},'.tiff')))
+       disp(numberValidCells)
+       segmentedImageOriginalStack=imresize3(segmentedImageResized, [size(segmentedImageResized,1) size(segmentedImageResized,2) (size(segmentedImageResized,3)/z_Scale)],'nearest');
+       writeStackTif(uint16(segmentedImageOriginalStack),fullfile(outPath,strcat(fileName{1},'.tiff')))
        
-       segmentedImageResized=relabelMulticutTiff(segmentedImageResized);
-       segmentedImageResized=imresize3(segmentedImageResized,[size(segmentedImageResized,1)/4 size(segmentedImageResized,2)/4 size(segmentedImageResized,3)*z_Scale/4],'nearest');
+%        segmentedImageResized=relabelMulticutTiff(segmentedImageResized);
+       segmentedImageResized=imresize3(segmentedImageResized,[size(segmentedImageResized,1)/4 size(segmentedImageResized,2)/4 size(segmentedImageResized,3)/4],'nearest');
        
         paint3D(segmentedImageResized, numberValidCells,colours, 3);
         material([0.5 0.2 0.0 10 1])
@@ -108,9 +109,9 @@ for nEmbryos=1:length(embryosFiles)
        
     end
     
-    imwrite(layout, strcat(outPath, '/', embryosFiles(nEmbryos).name, '.bmp'),'bmp');
+%     imwrite(layout, strcat(outPath, '/', embryosFiles(nEmbryos).name, '.bmp'),'bmp');
     imwrite(layout, strcat(outPath, '/', embryosFiles(nEmbryos).name,'.png'),'png');
-    save(strcat(outPath, '/', embryosFiles(nEmbryos).name,'.mat'), 'layout');
+%     save(strcat(outPath, '/', embryosFiles(nEmbryos).name,'.mat'), 'layout');
     
     
     

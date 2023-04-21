@@ -1,4 +1,4 @@
-function [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
+function [totalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,pixel_Scale] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
    
 
     [segmentedImage] = readStackTif(strcat(segmentedPath,'\',segmentedImageName));
@@ -46,12 +46,9 @@ function [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale] 
     segmentedImage=double(segmentedImage);
     segmentedImageResized= imresize3(segmentedImage, [size(originalImage,1),size(originalImage,2),size(originalImage,3)],'nearest');
     
-%     [segmentedImageResized] = relabelMulticutTiff(segmentedImageResized);
-%     
-%     segmentedImageResized=segmentedImageResized+1;
-%     segmentedImageResized(segmentedImageResized==1)=0;
+    [segmentedImageResized] = relabelMulticutTiff(segmentedImageResized);
 
-    cellProps = regionprops3(segmentedImageResized, "Centroid");
+%     cellProps = regionprops3(segmentedImageResized, "Centroid");
 %     [indexEmpty,~]=find(isnan(cellProps.Centroid));
 %     cellProps(indexEmpty,:)=[];
     
@@ -62,49 +59,56 @@ function [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale] 
     end
     
   %% Select z distance to select valid cells
-    zDistance=142;
-%     zDistance=150;
+ 
     
-    sliceFactor=round((zDistance+(zIndex)*z_Scale)/z_Scale); %Selecting zDistance from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
-    noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
+%     distXPixels= max(cellProps.Centroid(validCells(:),1)) - min(cellProps.Centroid(validCells(:),1));
+%     distXmicrons=distXPixels*pixel_Scale;
+%     
+%     distYPixels= max(cellProps.Centroid(validCells(:),2)) - min(cellProps.Centroid(validCells(:),2));
+%     distYmicrons=distYPixels*pixel_Scale;
+%     
+%     if distXmicrons > 200 || distYmicrons > 200
+%         disp(imageName);
+%     end
+%     
+    
+
+    [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
+    
+    labelledImage_realSize=labelledImage_realSize+1;
+    labelledImage_realSize(labelledImage_realSize==1)=0;
+    
+    zDistance=30; %30 microns
+    zThreshold=(zDistance/pixel_Scale)+(zIndex*z_Scale); %Selecting zDistance from the first slice with cells
+    cellProps = regionprops3(labelledImage_realSize, "Centroid");
+    
+    noValidCells=find(round(cellProps.Centroid(:,3))>zThreshold);
     
     [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
     noValidCells=unique([noValidCells; indexEmpty]);
     
-    validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
-    
-    distXPixels= max(cellProps.Centroid(validCells(:),1)) - min(cellProps.Centroid(validCells(:),1));
-    distXmicrons=distXPixels*pixel_Scale;
-    
-    distYPixels= max(cellProps.Centroid(validCells(:),2)) - min(cellProps.Centroid(validCells(:),2));
-    distYmicrons=distYPixels*pixel_Scale;
-    
-    if distXmicrons > 200 || distYmicrons > 200
-        disp(imageName);
-    end
-    
+    validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
     
     numberValidCells=length(validCells);
-    totalCells=max(max(max(segmentedImageResized)))-length(indexEmpty);
-%     [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
-%     
-%     contactThreshold = 0.5;
-% 
+    totalCells=max(max(max(labelledImage_realSize)))-length(indexEmpty);
+    
 %     [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,contactThreshold,validCells,noValidCells);
 
     
 %     segmentedImageResizedValidCells=segmentedImageResized;
     
     for nCell=1:length(noValidCells)
-        segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
+        labelledImage_realSize(labelledImage_realSize==noValidCells(nCell))=1;
     end
     
-    
+%      for nCell=1:length(noValidCells)
+%         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
+%     end
 
    
 
 
-    save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale','sliceFactor','cellProps');
+%     save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale','sliceFactor','cellProps');
     
     
 end
