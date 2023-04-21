@@ -60,32 +60,32 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     
     %% Select z distance to select valid cells
     
-    zDistance=142;
-    
+%     zDistance=142;
+%     
     contactThreshold=0.5;
-    sliceFactor=round((zDistance+(zIndex)*z_Scale)/z_Scale); %Selecting zDistance from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
-    noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
-    
-    [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
-    noValidCells=unique([noValidCells; indexEmpty]);
-    
-    validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
-
+%     sliceFactor=round((zDistance+(zIndex)*z_Scale)/z_Scale); %Selecting zDistance from the first slice with cells because we selected that in the first movie 20200114_pos1 this space.
+%     noValidCells=find(round(cellProps.Centroid(:,3))>sliceFactor);
+%     
+%     [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
+%     noValidCells=unique([noValidCells; indexEmpty]);
+%     
+%     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
+% 
     [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
     
 %     if exist(strcat(segmentedPath,'\','valid_cells.mat'),'file')==0
-%         zDistance=25; %25 microns
-%         zThreshold=(zDistance/pixel_Scale)+(zIndex*z_Scale); %Selecting zDistance from the first slice with cells
-%         cellProps = regionprops3(labelledImage_realSize, "Centroid");
-%         
-%         noValidCells=find(round(cellProps.Centroid(:,3))>zThreshold);
-%         
-%         [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
-%         noValidCells=unique([noValidCells; indexEmpty]);
-%         
-%         validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
-%         
-%         save(fullfile(segmentedPath,'valid_cells.mat'),'validCells','noValidCells');
+        zDistance=30; %30 microns
+        zThreshold=(zDistance/pixel_Scale)+(zIndex*z_Scale); %Selecting zDistance from the first slice with cells
+        cellProps = regionprops3(labelledImage_realSize, "Centroid");
+        
+        noValidCells=find(round(cellProps.Centroid(:,3))>zThreshold);
+        
+        [indexEmpty,~]=find(isnan(cellProps.Centroid(:,3)));
+        noValidCells=unique([noValidCells; indexEmpty]);
+        
+        validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
+        
+        save(fullfile(segmentedPath,'valid_cells.mat'),'validCells','noValidCells');
 %     else
 %         load(fullfile(segmentedPath,'valid_cells.mat'),'validCells','noValidCells');
 %     end
