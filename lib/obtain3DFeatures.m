@@ -2,8 +2,8 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
     if ~exist(fullfile(path2save, 'morphological3dFeatures.mat'),'file')
        
         %% (default se = 3)
-        dilatedVx = 4;
-        [lateral3dInfo_total,totalLateralCellsArea,absoluteLateralContacts] = getLateralContacts(lateralLayer,dilatedVx,contactThreshold);
+%         dilatedVx = 4;
+%         [lateral3dInfo_total,totalLateralCellsArea,absoluteLateralContacts] = getLateralContacts(lateralLayer,dilatedVx,contactThreshold);
 
         %% Cellular features 
 %         [apical3dInfo] = calculateNeighbours3D(apicalLayer, dilatedVx, apicalLayer == 0);
@@ -74,7 +74,11 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
 %         lumen3dFeatures.ID_Cell = 'Lumen';
 
         %% Obtain Tissue descriptors
-        [tissue3dFeatures] = extract3dDescriptors(labelledImage>0, 1);
+        validLabelledImage=labelledImage;
+        for nCell=1:length(noValidCells)
+            validLabelledImage(labelledImage==noValidCells(nCell))=0;
+        end
+        [tissue3dFeatures] = extract3dDescriptors(validLabelledImage>0, 1);
         tissue3dFeatures.ID_Cell = 'Tissue';
 
         %% Obtain Tissue + Lumen descriptors
@@ -84,15 +88,15 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
         
         %refactor purely voxels measurement to be compared with the surface
         %area extraction 
-%         sumApicalAreas = sum(CellularFeaturesAllCells.Apical_area);
-%         sumBasalAreas = sum(CellularFeaturesAllCells.Basal_area);
-%         refactorBasalAreas = sumBasalAreas/tissue3dFeatures.SurfaceArea;
-%         refactorApicalAreas = sumApicalAreas/lumen3dFeatures.SurfaceArea;
-%         
-%         lateralAreas = cells3dFeatures.SurfaceArea - (cellularFeaturesValidCells.Apical_area./refactorApicalAreas) - (cellularFeaturesValidCells.Basal_area./refactorBasalAreas);
-%         refactorLateralAreas = cellularFeaturesValidCells.Lateral_area./lateralAreas;
-%         
-        cellAreaNeighsInfo = table(cellularFeaturesValidCells.Apical_area,cellularFeaturesValidCells.Basal_area,cellularFeaturesValidCells.Cell_height,cellularFeaturesValidCells.Lateral_area,cellularFeaturesValidCells.Average_cell_wall_area,cellularFeaturesValidCells.Std_cell_wall_area,'VariableNames',{'apical_Area','basal_Area','cell_height','lateral_Area','average_cell_wall_Area','std_cell_wall_Area'});
+        sumApicalAreas = sum(CellularFeaturesAllCells.Apical_area);
+        sumBasalAreas = sum(CellularFeaturesAllCells.Basal_area);
+        refactorBasalAreas = sumBasalAreas/tissue3dFeatures.SurfaceArea;
+        refactorApicalAreas = sumApicalAreas/lumen3dFeatures.SurfaceArea;
+        
+        lateralAreas = cells3dFeatures.SurfaceArea - (cellularFeaturesValidCells.Apical_area./refactorApicalAreas) - (cellularFeaturesValidCells.Basal_area./refactorBasalAreas);
+        refactorLateralAreas = cellularFeaturesValidCells.Lateral_area./lateralAreas;
+        
+        cellAreaNeighsInfo = table(cellularFeaturesValidCells.Apical_area,cellularFeaturesValidCells.Basal_area,cellularFeaturesValidCells.Cell_height,cellularFeaturesValidCells.Lateral_area./refactorLateralAreas,'VariableNames',{'apical_Area','basal_Area','cell_height','lateral_Area'});
         cells3dFeatures = horzcat(cells3dFeatures,cellAreaNeighsInfo);
 
         %% Save variables
