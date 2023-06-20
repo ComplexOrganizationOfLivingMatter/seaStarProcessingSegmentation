@@ -22,18 +22,22 @@ for nFiles=1:length(segmentedEmbryosFiles)
     imageName=originalEmbryosFiles(nFiles).name;
     segmentName=segmentedEmbryosFiles(nFiles).name;
     fileName=strsplit(segmentName,'_itkws');
-    
+    fileName=strsplit(fileName{1},'.tif');
     if exist(fullfile(segmentPath, fileName{1})) ~=7
-        fileName=strsplit(segmentName,'_itkws');
         mkdir(segmentPath, fileName{1})
-         
     end
+    
+    try
     [generalInfo,tissue3dFeatures,meanCellsFeatures,stdCellsFeatures] = seaStarPostProcessing(originalImagePath,segmentPath,imageName,segmentName);
     
     allGeneralInfo{nFiles} = generalInfo;
     allTissues{nFiles} = tissue3dFeatures;
     allMeanCellsFeatures{nFiles} = meanCellsFeatures;
     allStdCellsFeatures{nFiles} = stdCellsFeatures;
+    catch
+        disp(strcat('error in file nº', num2str(nFiles)))
+        continue
+    end
     
 end
 
