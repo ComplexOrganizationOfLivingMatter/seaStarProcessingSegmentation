@@ -6,7 +6,7 @@ if size(allGeneralInfo{1,1},2)==size(allGeneralInfo{end,1},2)
     totalStdCellsFeatures = vertcat(totalStdCellsFeatures{:});
 else
     for nFile=1:size(allGeneralInfo,1)
-        if ~(size(allGeneralInfo{1,1},2)==size(allGeneralInfo{nFile,1},2))
+        if size(allGeneralInfo{nFile,1},2)~=4
         allGeneralInfo{nFile,1}=allGeneralInfo{nFile,1}(:,1:4);
         totalMeanCellsFeatures{nFile, 1} = removevars(totalMeanCellsFeatures{nFile, 1}, {'Fun_apical_NumNeighs','Fun_basal_NumNeighs','Fun_lateral_NumNeighs','Fun_n3d_apicoBasalNeighbours','Fun_average_cell_wall_Area','Fun_std_cell_wall_Area'});
         totalStdCellsFeatures{nFile, 1} = removevars(totalStdCellsFeatures{nFile, 1}, {'Fun_apical_NumNeighs','Fun_basal_NumNeighs','Fun_lateral_NumNeighs','Fun_n3d_apicoBasalNeighbours','Fun_average_cell_wall_Area','Fun_std_cell_wall_Area'});
@@ -28,6 +28,7 @@ end
     %%Polygon distribtutions
 %     polDistributions = [allGeneralInfo(:,1),allTissues(:,12:35)];
 %     writetable(polDistributions, [path2save,'global_3dFeatures_' date '.xls'],'Sheet', 'polygonDistributions','Range','B2');
+   try
     %%Celullar parameters
     cellularParameter_mean = [allGeneralInfo(:,1),totalMeanCellsFeatures(:,[12,14,1,11,13,4,5,6,8,3,7,10])];
     writetable(cellularParameter_mean, [path2save,'global_3dFeatures_' date '.xls'],'Sheet', 'meanCellParameters','Range','B2');
@@ -35,5 +36,19 @@ end
     %%Std parameters
     cellularParameter_std = [allGeneralInfo(:,1),totalStdCellsFeatures(:,[12,14,1,11,13,4,5,6,8,3,7,10])];
     writetable(cellularParameter_std, [path2save,'global_3dFeatures_' date '.xls'],'Sheet', 'stdCellParameters','Range','B2');   
+    
+   catch
+        %%Celullar parameters
+    cellularParameter_mean = [allGeneralInfo(:,1),totalMeanCellsFeatures(:,[12,1,11,4,5,6,8,3,7,10])];
+    writetable(cellularParameter_mean, [path2save,'global_3dFeatures_' date '.xls'],'Sheet', 'meanCellParameters','Range','B2');
+
+    %%Std parameters
+    cellularParameter_std = [allGeneralInfo(:,1),totalStdCellsFeatures(:,[12,1,11,9,2,4,5,6,8,3,7,10])];
+    writetable(cellularParameter_std, [path2save,'global_3dFeatures_' date '.xls'],'Sheet', 'stdCellParameters','Range','B2');   
+    
+       
+   end
+    
+   
 end
 
