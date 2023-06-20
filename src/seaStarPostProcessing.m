@@ -10,22 +10,34 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
 %     fileName=erase(fileName,'.tif');
     
     outputName=strsplit(segmentedImageName,'_itkws');
+    outputName=strsplit(outputName{1},'.tif');
     segmentedPath=strcat(segmentedPath,'\',outputName{1});
     
     if exist(strcat(segmentedPath,'\',outputName{1},'.mat'),'file')==0
-    
+        
         pixelWidth=1/unique([imgInfo.XResolution]);
         
-        extractingSpacing = strsplit(imgInfo(1).ImageDescription, 'spacing=');
-        extractingSpacing = extractingSpacing{2};
-        extractingSpacing = strsplit(extractingSpacing, 'loop=');
-        extractingSpacing = extractingSpacing{1};
-        pixelDepth = str2num(extractingSpacing);
+        try
+            extractingSpacing = strsplit(imgInfo(1).ImageDescription, 'spacing=');
+            extractingSpacing = extractingSpacing{2};
+            extractingSpacing = strsplit(extractingSpacing, 'loop=');
+            extractingSpacing = extractingSpacing{1};
+            pixelDepth = str2num(extractingSpacing);
+            
+            z_Scale=pixelDepth/pixelWidth;
+            pixel_Scale = pixelWidth;
+            
+            
+            save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale');
+            
+        catch
+            disp('error')
+            z_Scale=1;
+            pixel_Scale=1;
+            originalImage=imresize3(originalImage,[512 512 512],'nearest');
+            segmentedImage=flip(segmentedImage,3);
+        end
         
-        z_Scale=pixelDepth/pixelWidth;
-        pixel_Scale = pixelWidth;
-        
-        save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale');
     else
         load(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale');
     end
@@ -45,8 +57,9 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     
     segmentedImage=double(segmentedImage);
     segmentedImageResized= imresize3(segmentedImage, [size(originalImage,1),size(originalImage,2),size(originalImage,3)],'nearest');
-    
-    [segmentedImageResized] = relabelMulticutTiff(segmentedImageResized);
+
+  
+%     [segmentedImageResized] = relabelMulticutTiff(segmentedImageResized);
     
 
     cellProps = regionprops3(segmentedImageResized, "Centroid");
@@ -71,8 +84,12 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
 %     
 %     validCells=setdiff(1:max(max(max(segmentedImageResized))),noValidCells);
 % 
-    [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
-    
+if z_Scale>1 
+    [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized,z_Scale);
+else
+    labelledImage_realSize=segmentedImageResized;
+end    
+
 %     if exist(strcat(segmentedPath,'\','valid_cells.mat'),'file')==0
         zDistance=30; %30 microns
         zThreshold=(zDistance/pixel_Scale)+(zIndex*z_Scale); %Selecting zDistance from the first slice with cells
@@ -85,12 +102,18 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
         
         validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
         
-        save(fullfile(segmentedPath,'valid_cells.mat'),'validCells','noValidCells');
+%         save(fullfile(segmentedPath,'valid_cells.mat'),'validCells','noValidCells');
 %     else
 %         load(fullfile(segmentedPath,'valid_cells.mat'),'validCells','noValidCells');
 %     end
+if z_Scale>1  
     [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,contactThreshold,validCells,noValidCells);
-   
+else
+     [apicalLayer,basalLayer,lateralLayer,lumenImage] = getApicalBasalLateralAndLumenFromCyst(segmentedImageResized,segmentedPath);
+     [scutoids_cells,validScutoids_cells]=calculateOnlyScutoids(segmentedImageResized,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,0.5,validCells,noValidCells);
+
+
+end
     
 %     segmentedImageResizedValidCells=labelledImage_realSize;
 %     
