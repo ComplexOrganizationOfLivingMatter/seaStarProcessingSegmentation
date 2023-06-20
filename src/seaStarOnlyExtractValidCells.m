@@ -1,4 +1,4 @@
-function [totalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,pixel_Scale] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
+function [totalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,pixel_Scale,originalImage] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
    
 
     [segmentedImage] = readStackTif(strcat(segmentedPath,'\',segmentedImageName));
@@ -105,7 +105,7 @@ function [totalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,
 %         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
 %     end
 
-   
+axisLengths=regionprops3(labelledImage_realSize>1,'PrincipalAxisLength');   
 
 
 %     save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale','sliceFactor','cellProps');
