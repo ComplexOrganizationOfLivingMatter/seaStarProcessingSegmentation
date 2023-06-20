@@ -15,4 +15,4 @@ Images/*
 *.zip
 *.docx
 *.jpeg
-lib/calculate_CellularFeatures.asv
+*.asv
