@@ -30,7 +30,6 @@ function [neighsFiltered,totalLateralCellsArea,absoluteLateralContacts] = getLat
         neighs_real{cells(numCell), 1} = uniqueNeighs;
         
         percentageLateralContacts{numCell}=arrayfun(@(x) 100*(sum(neighCellsLabels==x)/length(neighCellsLabels)), uniqueNeighs);
-        
         %%filter minimal contacts
         id2Filter = percentageLateralContacts{numCell}<contactThreshold;
         neighs2delete{cells(numCell), 1} = unique([neighs2delete{cells(numCell), 1};uniqueNeighs(id2Filter) ]);
