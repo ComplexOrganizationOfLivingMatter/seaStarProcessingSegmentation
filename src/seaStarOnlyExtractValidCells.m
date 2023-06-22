@@ -1,4 +1,4 @@
-function [totalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,pixel_Scale,originalImage] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
+function [numberTotalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,pixel_Scale,originalImage] = seaStarOnlyExtractValidCells(originalImgPath,segmentedPath,imageName,segmentedImageName)
    
 
     [segmentedImage] = readStackTif(strcat(segmentedPath,'\',segmentedImageName));
@@ -58,26 +58,13 @@ function [totalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,
        end
     end
     
-  %% Select z distance to select valid cells
- 
-    
-%     distXPixels= max(cellProps.Centroid(validCells(:),1)) - min(cellProps.Centroid(validCells(:),1));
-%     distXmicrons=distXPixels*pixel_Scale;
-%     
-%     distYPixels= max(cellProps.Centroid(validCells(:),2)) - min(cellProps.Centroid(validCells(:),2));
-%     distYmicrons=distYPixels*pixel_Scale;
-%     
-%     if distXmicrons > 200 || distYmicrons > 200
-%         disp(imageName);
-%     end
-%     
-    
-
-    [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized);
+    %%resize Tissue
+    [~,~,~,labelledImage_realSize]=resizeTissue(segmentedPath,outputName{1},segmentedImageResized,z_Scale,1);
     
     labelledImage_realSize=labelledImage_realSize+1;
     labelledImage_realSize(labelledImage_realSize==1)=0;
     
+     %% Select z distance to select valid cells  
     zDistance=30; %30 microns
     zThreshold=(zDistance/pixel_Scale)+(zIndex*z_Scale); %Selecting zDistance from the first slice with cells
     cellProps = regionprops3(labelledImage_realSize, "Centroid");
@@ -91,21 +78,22 @@ function [totalCells,numberValidCells,validCells,labelledImage_realSize,z_Scale,
     
     numberValidCells=length(validCells);
     totalCells=max(max(max(labelledImage_realSize)))-length(indexEmpty);
+    numberTotalCells=length(totalCells);
     
 %     [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,contactThreshold,validCells,noValidCells);
 
     
 %     segmentedImageResizedValidCells=segmentedImageResized;
     
-    for nCell=1:length(noValidCells)
-        labelledImage_realSize(labelledImage_realSize==noValidCells(nCell))=1;
-    end
+%     for nCell=1:length(noValidCells)
+%         labelledImage_realSize(labelledImage_realSize==noValidCells(nCell))=1;
+%     end
     
 %      for nCell=1:length(noValidCells)
 %         segmentedImageResized(segmentedImageResized==noValidCells(nCell))=1;
 %     end
 
-axisLengths=regionprops3(labelledImage_realSize>1,'PrincipalAxisLength');   
+% axisLengths=regionprops3(labelledImage_realSize>1,'PrincipalAxisLength');   
 
 
 %     save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale','sliceFactor','cellProps');
