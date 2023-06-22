@@ -44,13 +44,19 @@ for nEmbryos=1:length(embryosFiles)
             mkdir(segmentPath, fileName{1})
 
         end
-        [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale,pixel_Scale] = seaStarOnlyExtractValidCells(originalImagePath,segmentPath,imageName,segmentName);
+        
+        %% remove later
+        [segmentedImageResized,z_Scale,pixel_Scale] = seaStarOnlyResize(originalImagePath,segmentPath,imageName,segmentName);
+        writeStackTif(uint16(segmentedImageResized),fullfile(outPath,strcat(fileName{1},'.tiff')))
+        continue
+        
+        [totalCells,numberValidCells,validCells,segmentedImageResized,z_Scale,pixel_Scale,originalImage] = seaStarOnlyExtractValidCells(originalImagePath,segmentPath,imageName,segmentName);
         
        allGeneralInfo{nFiles,1} =  fileName{1};
        allGeneralInfo{nFiles,2} = totalCells;
        allGeneralInfo{nFiles,3} = numberValidCells;
        disp(numberValidCells)
-       segmentedImageOriginalStack=imresize3(segmentedImageResized, [size(segmentedImageResized,1) size(segmentedImageResized,2) (size(segmentedImageResized,3)/z_Scale)],'nearest');
+       segmentedImageOriginalStack=imresize3(segmentedImageResized, [size(segmentedImageResized,1) size(segmentedImageResized,2) (size(originalImage,3))],'nearest');
        writeStackTif(uint16(segmentedImageOriginalStack),fullfile(outPath,strcat(fileName{1},'.tiff')))
        
 %        segmentedImageResized=relabelMulticutTiff(segmentedImageResized);
@@ -108,7 +114,7 @@ for nEmbryos=1:length(embryosFiles)
        
        
     end
-    
+    continue %remove later
 %     imwrite(layout, strcat(outPath, '/', embryosFiles(nEmbryos).name, '.bmp'),'bmp');
     imwrite(layout, strcat(outPath, '/', embryosFiles(nEmbryos).name,'.png'),'png');
 %     save(strcat(outPath, '/', embryosFiles(nEmbryos).name,'.mat'), 'layout');

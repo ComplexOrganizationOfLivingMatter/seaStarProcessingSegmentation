@@ -27,20 +27,20 @@ for nFiles=1:length(segmentedEmbryosFiles)
         mkdir(segmentPath, fileName{1})
     end
     
-    try
+%     try
     [generalInfo,tissue3dFeatures,meanCellsFeatures,stdCellsFeatures] = seaStarPostProcessing(originalImagePath,segmentPath,imageName,segmentName);
     
     allGeneralInfo{nFiles} = generalInfo;
     allTissues{nFiles} = tissue3dFeatures;
     allMeanCellsFeatures{nFiles} = meanCellsFeatures;
     allStdCellsFeatures{nFiles} = stdCellsFeatures;
-    catch
-        disp(strcat('error in file nº', num2str(nFiles)))
-        continue
-    end
+%     catch
+%         disp(strcat('error in file nº', num2str(nFiles)))
+%         continue
+%     end
     
 end
 
-summarizeAllTissuesProperties(allGeneralInfo,allTissues,allMeanCellsFeatures,allStdCellsFeatures,inPath);
+summarizeAllTissuesProperties(allGeneralInfo,allTissues,allMeanCellsFeatures,allStdCellsFeatures,inPath,[],1);
 
 
