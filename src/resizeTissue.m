@@ -1,4 +1,4 @@
-function [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,fileName,correctLabelledImage,z_Scale)
+function [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,fileName,correctLabelledImage,z_Scale,saveRequest)
 
 if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
     
@@ -56,10 +56,11 @@ if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
     
     lateralLayer(basalLayer>0 | apicalLayer>0) = 0;
     
-    save(fullfile(segmentedPath,strcat(fileName,'.mat')), 'labelledImage_realSize','apicalLayer','basalLayer','lateralLayer', '-v7.3');
-    
+    if saveRequest==1
+        save(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','apicalLayer','basalLayer','lateralLayer', '-v7.3');
+    end
 else
-    load(fullfile(segmentedPath,strcat(fileName,'.mat')))
+    load(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','apicalLayer','basalLayer','lateralLayer')
 end
 
 end
