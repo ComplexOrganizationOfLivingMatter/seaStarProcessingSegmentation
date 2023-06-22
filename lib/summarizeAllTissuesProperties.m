@@ -1,4 +1,5 @@
-function summarizeAllTissuesProperties(allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures,path2save)
+function summarizeAllTissuesProperties(allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures,path2save,fileName,featuresRequested)
+if featuresRequested==1
 if size(allGeneralInfo{1,1},2)==size(allGeneralInfo{end,1},2)
     allGeneralInfo = vertcat(allGeneralInfo{:});
     allTissues = vertcat(allTissues{:});
@@ -48,7 +49,10 @@ end
     
        
    end
-    
+else
+   allGeneralInfo = vertcat(allGeneralInfo{:});
+   writetable(allGeneralInfo, strcat(path2save,'global_3dFeatures_', fileName,'_',date,'.xls'),'Sheet', 'meanParameters','Range','B2');
+end
    
 end
 
