@@ -22,7 +22,7 @@ for nCell=1:length(valid_scutoids)
     end
 end
 
-writeStackTif(uint16(resizedLabelledImage), strcat(path2save,'\','resized_',fileName,'.tif'));
+writeStackTif(uint16(resizedLabelledImage), strcat(path2save,'\','validScutoids_',fileName,'.tif'));
 
 
 end
