@@ -1,4 +1,4 @@
-function [scutoids_cells,validScutoids_cells,surfaceRatio3D]=calculateScutoidsAndSR(labelledImage,apicalLayer,basalLayer,lateralLayer,path2save,fileName,dilatedVx,contactThreshold,validCells)
+function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(labelledImage,apicalLayer,basalLayer,lateralLayer,path2save,fileName,dilatedVx,contactThreshold,validCells,pixel_Scale)
 
 %defining all cells as valid cells
 if isempty(validCells)
@@ -53,11 +53,15 @@ neighbours_data = table(apical3dInfo, basal3dInfo, lateral3dInfo);
 neighbours_data.Properties.VariableNames = {'Apical','Basal','Lateral'};
 
 %%  Calculate surface ratio
-apical_area_cells=cell2mat(struct2cell(regionprops(apicalLayer,'Area'))).';
-basal_area_cells=cell2mat(struct2cell(regionprops(basalLayer,'Area'))).';
+apicalLayerResized=imresize3(apicalLayer,size(apicalLayer)*4,'nearest');
+basalLayerResized=imresize3(basalLayer,size(basalLayer)*4,'nearest');
+apical_area_cells=cell2mat(struct2cell(regionprops(apicalLayerResized,'Area'))).';
+basal_area_cells=cell2mat(struct2cell(regionprops(basalLayerResized,'Area'))).';
 lateral_area_cells = totalLateralCellsArea;
 
-surfaceRatio3D = sum(basal_area_cells(validCells)) / sum(apical_area_cells(validCells));
+outerArea=sum(basal_area_cells(validCells));
+innerArea=sum(apical_area_cells(validCells));
+surfaceRatio3D = outerArea / innerArea;
 
 %%  Determine if a cell is a scutoid or not
 apicoBasalTransitions = cellfun(@(x, y) length(unique(vertcat(setdiff(y,x), setdiff(x,y)))), neighbours_data.Apical,neighbours_data.Basal);

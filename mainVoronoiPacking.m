@@ -1,4 +1,4 @@
-%% First pipeline to modify mistakes on S. Glands
+
 addpath(genpath('src'))
 addpath(genpath('lib'))
 
@@ -37,18 +37,18 @@ for nEmbryos=1:length(embryosFiles)
         [~,~,~,labelledImage,z_Scale,pixel_Scale,originalImage] = seaStarOnlyExtractValidCells(originalImagePath,segmentPath,imageName,segmentName);        
         
         %make Voronoi models
-        [voronoiCyst]=makeVoronoiModels(originalImage,labelledImage,embryoPath,fileName{1});
+        [voronoiCyst]=makeVoronoiModels(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
         [basalLayer,apicalLayer,lateralLayer,voronoiCyst]=resizeTissue(embryoPath,fileName{1},voronoiCyst,1,0);
-        voronoiCystResized=imresize3(voronoiCyst,[size(originalImage,1:2) size(originalImage,3)*z_Scale],'nearest');
+        voronoiCystResized=imresize3(voronoiCyst,[size(originalImage,1:2) size(originalImage,3)*z_Scale],'nearest'); %Voronoi same size embryo
         
         %select valid cells
         [numberTotalCells,validCells,numberValidCells]=filterValidRegion(voronoiCystResized,pixel_Scale);
         
         %Quantify scutoids
         dilatedVx=2;
-        contactThreshold=0.5;
-        [scutoids_cells,validScutoids_cells,surfaceRatio3D]=calculateScutoidsAndSR(voronoiCyst,apicalLayer,basalLayer,lateralLayer,embryoPath,fileName{1},dilatedVx,contactThreshold,validCells);
-        generalInfo= cell2table([{fileName(1)}, {surfaceRatio3D}, {numberValidCells},{numberTotalCells},{mean(scutoids_cells)},{mean(validScutoids_cells)}],'VariableNames', {'ID_Tissue', 'SurfaceRatio3D_areas', 'NCells_valid','NCells_total','Scutoids','valid_Scutoids'});
+        contactThreshold=1;
+        [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(voronoiCyst,apicalLayer,basalLayer,lateralLayer,embryoPath,fileName{1},dilatedVx,contactThreshold,validCells,pixel_Scale); %input Voronoi homogeneised and reduced x4
+        generalInfo= cell2table([{fileName(1)}, {surfaceRatio3D}, {numberValidCells},{numberTotalCells},{mean(scutoids_cells)},{mean(validScutoids_cells)},{outerArea},{innerArea}],'VariableNames', {'ID_Tissue', 'SurfaceRatio3D_areas', 'NCells_valid','NCells_total','Scutoids','valid_Scutoids','outer_Area','inner_Area'});
         allGeneralInfo{nFiles} = generalInfo;
 
         %export valid region and scutoids
