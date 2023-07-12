@@ -1,5 +1,5 @@
-rgStackPath = strcat('D:\Antonio\seaStar\seaStar_segmentation\rawForM2\');
-savePath = strcat('D:\Antonio\seaStar\seaStar_segmentation\rawForM2\output\');
+rgStackPath = strcat('D:\Antonio\seaStar\embryo lengths\stacks\');
+savePath = strcat('D:\Antonio\seaStar\embryo lengths\stacks\hom\');
 
 rgStackDir = dir(strcat(rgStackPath, '*.tif'));
 
