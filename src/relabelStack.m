@@ -1,4 +1,4 @@
-function [img2] = relabelMulticutTiff(img)
+function [img2] = relabelStack(img)
 
 uniqueLabels = unique(img);
 
