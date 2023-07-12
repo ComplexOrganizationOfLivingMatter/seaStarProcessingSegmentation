@@ -1,20 +1,16 @@
-function [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentedPath,fileName,correctLabelledImage,z_Scale,saveRequest)
+function [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=getApicalBasalLateralFromEmbryos(segmentedPath,fileName,correctLabelledImage,z_Scale,saveRequest)
 
 if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
     
-    %% Step 1: Creating image with its real size
-%     load(strcat(segmentedPath,'/',fileName,'.mat'),'z_Scale');
-    
+    %% Step 1: Resize image stacks
     labelledImage_realSize  = imresize3(correctLabelledImage, [size(correctLabelledImage,1) size(correctLabelledImage,2) z_Scale*size(correctLabelledImage,3)], 'nearest');
     lateralLayer = zeros(size(labelledImage_realSize));
     
-    %binarize
+    %% Step 2: Get Apical and Basal Layers
     binaryLabels = (labelledImage_realSize>0);
-    
+    binaryChunk = binaryLabels;
     %Voy hacer un troncho de valor 1 para 'rellenar' la parte superior del
     %paraboloide o semiesfera
-    
-    binaryChunk = binaryLabels;
     
     %rellenar todos los Z superiores a cada punto con información
     for x=1:size(binaryLabels, 1)
@@ -29,18 +25,13 @@ if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
     binaryChunk = imfill(binaryChunk, 'holes');
     apicalChunk = binaryChunk - binaryLabels;
     
-    % dilato
+    % Dilate and compare labels
     se = strel('sphere',2);
     dilatedApicalChunk = imdilate(apicalChunk, se);
-    
-    % comparo con labels
     apicalLayer = dilatedApicalChunk.*binaryLabels;
     
-    % basal: hacer inversa y volver a hacer lo mismo
-    %inversa
+    % To get basal layer, make inverse matrix and repeat the process
     inverseBinaryChunk = ones(size(binaryChunk))-binaryChunk;
-    
-    % dilato
     se = strel('sphere',2);
     dilatedInverseBinaryChunk = imdilate(inverseBinaryChunk, se);
     basalLayer = dilatedInverseBinaryChunk.*binaryLabels;
@@ -48,12 +39,12 @@ if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
     apicalLayer = apicalLayer.*labelledImage_realSize;
     basalLayer = basalLayer.*labelledImage_realSize;
     
+    %% STEP 3: Get Lateral Layer and save information.
     totalCells = unique(labelledImage_realSize)';
     for nCell = totalCells
         perimLateralCell = bwperim(labelledImage_realSize==nCell);
         lateralLayer(perimLateralCell)=nCell;
     end
-    
     lateralLayer(basalLayer>0 | apicalLayer>0) = 0;
     
     if saveRequest==1
