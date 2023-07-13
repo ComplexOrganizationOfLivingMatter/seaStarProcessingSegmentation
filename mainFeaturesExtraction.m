@@ -5,6 +5,7 @@ addpath(genpath('lib'))
 clear all
 close all
 
+%% Select path where the segmented and original files are found,
 inPath = uigetdir('E:\Antonio\SeaStar Proyect\SeaStar_Segmentation\animalEmbryos\20200114_pos1');
 
 segmentedEmbryosFiles = dir(strcat(inPath,'/segmentedImages/*.tif*'));
@@ -15,6 +16,7 @@ allTissues = cell(size(segmentedEmbryosFiles,1),1);
 allMeanCellsFeatures = cell(size(segmentedEmbryosFiles,1),1);
 allStdCellsFeatures = cell(size(segmentedEmbryosFiles,1),1);
 
+%% Select the different timepoints of each embryo
 for nFiles=1:length(segmentedEmbryosFiles)
 
     originalImagePath = originalEmbryosFiles(nFiles).folder;
@@ -27,17 +29,12 @@ for nFiles=1:length(segmentedEmbryosFiles)
         mkdir(segmentPath, fileName{1})
     end
     
-%     try
     [generalInfo,tissue3dFeatures,meanCellsFeatures,stdCellsFeatures] = seaStarPostProcessing(originalImagePath,segmentPath,imageName,segmentName);
     
     allGeneralInfo{nFiles} = generalInfo;
     allTissues{nFiles} = tissue3dFeatures;
     allMeanCellsFeatures{nFiles} = meanCellsFeatures;
     allStdCellsFeatures{nFiles} = stdCellsFeatures;
-%     catch
-%         disp(strcat('error in file nº', num2str(nFiles)))
-%         continue
-%     end
     
 end
 

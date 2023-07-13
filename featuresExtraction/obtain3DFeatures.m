@@ -24,14 +24,14 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
             validCells=unique([validCells(:);extraValidCells(:)])';
             disp(['Added as valid cell: ' num2str([extraValidCells(:)]')])
         end
-%         noValidCells(ismember(noValidCells,missingCells))=[];
+
         numValidCells = length(validCells);
         validCells=validCells';
         
         %% Obtain cells descriptors
         % get cell size descriptors
         [cellularFeaturesValidCells,CellularFeaturesAllCells,surfaceRatio3D] = calculate_CellularFeatures(apicalLayer,basalLayer,labelledImage,totalLateralCellsArea,absoluteLateralContacts,noValidCells,validCells);
-        %%Extract cell shape descriptors
+        %%Extract 3d descriptors
         [cells3dFeatures] = extract3dDescriptors(labelledImage, validCells);
 
         %% Obtain Tissue descriptors
