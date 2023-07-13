@@ -42,7 +42,7 @@ for nEmbryos=1:length(embryosFiles)
         voronoiCystResized=imresize3(voronoiCyst,[size(originalImage,1:2) size(originalImage,3)*z_Scale],'nearest'); %Voronoi same size embryo
         
         %select valid cells
-        [numberTotalCells,validCells,numberValidCells]=filterValidRegion(voronoiCystResized,pixel_Scale);
+        [numberTotalCells,validCells,numberValidCells,~]=filterValidRegion(voronoiCystResized,pixel_Scale);
         
         %Quantify scutoids
         dilatedVx=2;

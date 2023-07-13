@@ -2,20 +2,6 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio]
     %CALCULATE_CELLULARFEATURES Summary of this function goes here
     %   Detailed explanation goes here
 
-    %% Calculate polygon distribution
-%     [polygon_distribution_Apical] = calculate_polygon_distribution(cellfun(@length, apical3dInfo), validCells);
-%     [polygon_distribution_Basal] = calculate_polygon_distribution(cellfun(@length, basal3dInfo), validCells);
-%     [polygon_distribution_Lateral] = calculate_polygon_distribution(cellfun(@length, lateral3dInfo), validCells);
-%     neighbours_data = table(apical3dInfo, basal3dInfo, lateral3dInfo);
-% %     polygon_distribution = table(polygon_distribution_Apical, polygon_distribution_Basal,polygon_distribution_Lateral);
-%     neighbours_data.Properties.VariableNames = {'Apical','Basal','Lateral'};
-%     polygon_distribution.Properties.VariableNames = {'Apical','Basal','Lateral'};
-
-    %%  Calculate number of neighbours of each cell
-%     number_neighbours = table(cellfun(@length,(apical3dInfo)),cellfun(@length,(basal3dInfo)),cellfun(@length,(lateral3dInfo)));
-%    
-%     apicobasal_neighbours=cellfun(@(x,y)(unique(vertcat(x,y))), apical3dInfo, basal3dInfo, 'UniformOutput',false);
-%     apicobasal_neighboursRecount= cellfun(@length ,apicobasal_neighbours);
     
     %%  Calculate area cells
     apical_area_cells=cell2mat(struct2cell(regionprops(apicalLayer,'Area'))).';
@@ -46,10 +32,9 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio]
         end
     end
     
-    average_lateral_wall = zeros(size(apical_area_cells,1),1);
-    std_lateral_wall = zeros(size(apical_area_cells,1),1);
-    
-    meanSurfaceRatio = sum(basal_area_cells(validCells)) / sum(apical_area_cells(validCells));
+    totalInnerArea=sum(basal_area_cells(validCells));
+    totalOuterArea=sum(apical_area_cells(validCells));
+    meanSurfaceRatio =  / ;
 
     %%  Calculate volume cells
     volume_cells=table2array(regionprops3(labelledImage,'Volume'));

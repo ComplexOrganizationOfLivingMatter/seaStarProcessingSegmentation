@@ -1,4 +1,4 @@
-function [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=getApicalBasalLateralFromEmbryos(segmentedPath,fileName,correctLabelledImage,z_Scale,saveRequest)
+function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getApicalBasalLateralFromEmbryos(segmentedPath,fileName,correctLabelledImage,z_Scale,saveRequest)
 
 if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
     
@@ -23,21 +23,21 @@ if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
     end
     
     binaryChunk = imfill(binaryChunk, 'holes');
-    apicalChunk = binaryChunk - binaryLabels;
+    innerChunk = binaryChunk - binaryLabels;
     
     % Dilate and compare labels
     se = strel('sphere',2);
-    dilatedApicalChunk = imdilate(apicalChunk, se);
-    apicalLayer = dilatedApicalChunk.*binaryLabels;
+    dilatedApicalChunk = imdilate(innerChunk, se);
+    innerLayer = dilatedApicalChunk.*binaryLabels;
     
-    % To get basal layer, make inverse matrix and repeat the process
+    % To get apical layer, make inverse matrix and repeat the process
     inverseBinaryChunk = ones(size(binaryChunk))-binaryChunk;
     se = strel('sphere',2);
     dilatedInverseBinaryChunk = imdilate(inverseBinaryChunk, se);
-    basalLayer = dilatedInverseBinaryChunk.*binaryLabels;
+    outerLayer = dilatedInverseBinaryChunk.*binaryLabels;
     
-    apicalLayer = apicalLayer.*labelledImage_realSize;
-    basalLayer = basalLayer.*labelledImage_realSize;
+    innerLayer = innerLayer.*labelledImage_realSize;
+    outerLayer = outerLayer.*labelledImage_realSize;
     
     %% STEP 3: Get Lateral Layer and save information.
     totalCells = unique(labelledImage_realSize)';
@@ -45,7 +45,7 @@ if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
         perimLateralCell = bwperim(labelledImage_realSize==nCell);
         lateralLayer(perimLateralCell)=nCell;
     end
-    lateralLayer(basalLayer>0 | apicalLayer>0) = 0;
+    lateralLayer(outerLayer>0 | innerLayer>0) = 0;
     
     if saveRequest==1
         save(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','apicalLayer','basalLayer','lateralLayer', '-v7.3');

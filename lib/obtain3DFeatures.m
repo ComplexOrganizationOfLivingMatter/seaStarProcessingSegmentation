@@ -1,41 +1,10 @@
-function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surfaceRatio3D, validCells] = obtain3DFeatures(labelledImage,apicalLayer,basalLayer,lateralLayer,validCells,noValidCells,path2save,contactThreshold)
+function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surfaceRatio3D, validCells] = obtain3DFeatures(labelledImage,apicalLayer,basalLayer,lateralLayer,validCells,noValidCells,path2save)
     if ~exist(fullfile(path2save, 'morphological3dFeatures.mat'),'file')
-       
-        %% (default se = 3)
-%         dilatedVx = 4;
-%         [lateral3dInfo_total,totalLateralCellsArea,absoluteLateralContacts] = getLateralContacts(lateralLayer,dilatedVx,contactThreshold);
 
-        %% Cellular features 
-%         [apical3dInfo] = calculateNeighbours3D(apicalLayer, dilatedVx, apicalLayer == 0);
-%         
-%         if size(apical3dInfo.neighbourhood,1) < size(lateral3dInfo_total',1)
-%             for nCell=size(apical3dInfo.neighbourhood,1)+1:size(lateral3dInfo_total',1)
-%                 apical3dInfo.neighbourhood{nCell}=[];
-%                 
-%             end
-%         elseif size(apical3dInfo.neighbourhood,1) > size(lateral3dInfo_total',1)
-%             apical3dInfo.neighbourhood=apical3dInfo.neighbourhood(1:size(lateral3dInfo_total,2),1);
-%         end
-%       
-%         apical3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo_total,apical3dInfo.neighbourhood','UniformOutput',false);
-%         
-%         [basal3dInfo] = calculateNeighbours3D(basalLayer, dilatedVx, basalLayer == 0);
-%         
-%         if size(basal3dInfo.neighbourhood,1) < size(lateral3dInfo_total',1)
-%             for nCell=size(basal3dInfo.neighbourhood,1)+1:size(lateral3dInfo_total',1)
-%                 basal3dInfo.neighbourhood{nCell}=[]; 
-%             end
-%             
-%         elseif size(basal3dInfo.neighbourhood,1) > size(lateral3dInfo_total',1)
-%             basal3dInfo.neighbourhood=basal3dInfo.neighbourhood(1:size(lateral3dInfo_total,2),1);
-%         end
-%         
-%         
-%         basal3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo_total,basal3dInfo.neighbourhood','UniformOutput',false);
-%         
-                
+        %% Cellular features       
         lateralLayerAux = lateralLayer;
         lateralLayerAux(labelledImage==0)=0;
+        
         if ~isequal(lateralLayer, lateralLayerAux)
             %%the threshold is only applied in the full lateral surface
             [lateral3dInfoAux,totalLateralCellsArea,absoluteLateralContacts] = getLateralContacts(lateralLayerAux,dilatedVx,0);
@@ -57,21 +26,13 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
         end
 %         noValidCells(ismember(noValidCells,missingCells))=[];
         numValidCells = length(validCells);
-
         validCells=validCells';
+        
         %% Obtain cells descriptors
-        % get apical, basal and lateral sides cells. Areas and cell Volume
+        % get cell size descriptors
         [cellularFeaturesValidCells,CellularFeaturesAllCells,surfaceRatio3D] = calculate_CellularFeatures(apicalLayer,basalLayer,labelledImage,totalLateralCellsArea,absoluteLateralContacts,noValidCells,validCells);
-        %%Extract each cell and calculate 3D features
+        %%Extract cell shape descriptors
         [cells3dFeatures] = extract3dDescriptors(labelledImage, validCells);
-        
-%         polygon_distribution_basal= polygon_distribution.Basal;
-%         polygon_distribution_apical = polygon_distribution.Apical;
-%         polygon_distribution_lateral = polygon_distribution.Lateral;
-        
-        %% Obtain Lumen descriptors
-%         [lumen3dFeatures] = extract3dDescriptors(lumenImage>0, 1);
-%         lumen3dFeatures.ID_Cell = 'Lumen';
 
         %% Obtain Tissue descriptors
         validLabelledImage=labelledImage;
@@ -81,11 +42,6 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
         [tissue3dFeatures] = extract3dDescriptors(validLabelledImage>0, 1);
         tissue3dFeatures.ID_Cell = 'Tissue';
 
-        %% Obtain Tissue + Lumen descriptors
-%         [tissue3dFeatures] = extract3dDescriptors(labelledImage>0|lumenImage>0, 1);
-%         tissue3dFeatures.ID_Cell = 'Tissue and Lumen';
-
-        
         %refactor purely voxels measurement to be compared with the surface
         %area extraction 
         sumApicalAreas = sum(CellularFeaturesAllCells.Apical_area);
@@ -104,9 +60,6 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
 
     else
         load(fullfile(path2save, 'morphological3dFeatures.mat'), 'cells3dFeatures', 'tissue3dFeatures','cellularFeaturesValidCells','CellularFeaturesAllCells', 'numValidCells','numTotalCells', 'surfaceRatio3D');        
-%         numValidCells = length(validCells);
-%         cellularFeaturesValidCells = CellularFeaturesAllCells(validCells,:);  
-%         save(fullfile(path2save, 'morphological3dFeatures.mat'), 'cells3dFeatures', 'tissue3dFeatures', 'cellularFeaturesValidCells', 'numValidCells','numTotalCells', 'surfaceRatio3D', 'apicoBasalNeighs', 'apical3dInfo','basal3dInfo','lateral3dInfo');
     end
 end
 
