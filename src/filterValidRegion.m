@@ -1,11 +1,13 @@
-function [numberTotalCells,validCells,numberValidCells]=filterValidRegion(labelledImage,pixel_Scale)
+function [numberTotalCells,validCells,numberValidCells,noValidCells]=filterValidRegion(labelledImage,pixel_Scale)
+
+%% Identify first slice with labels.
 for zIndex=1:size(labelledImage,3)
     if max(max(max(labelledImage(:,:,zIndex))))>0
         break
     end
 end
     
-    %% Select z distance to select valid cells  
+%% Select z distance to select valid cells  
     zDistance=30; %30 microns
     zThreshold=(zDistance/pixel_Scale)+zIndex; %Selecting zDistance from the first slice with cells
     cellProps = regionprops3(labelledImage, "Centroid");
