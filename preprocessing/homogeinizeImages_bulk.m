@@ -1,5 +1,11 @@
-rgStackPath = strcat('D:\Antonio\seaStar\embryo lengths\stacks\');
-savePath = strcat('D:\Antonio\seaStar\embryo lengths\stacks\hom\');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% homogeinizeImages_bulk
+% Main code for scaling all 3 dimensions of the image
+% so it can be seen with the correct proportions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+rgStackPath = strcat('D:\pathTo\RawImage\stacks\');
+savePath = strcat('D:\pathTo\save\images\');
 
 rgStackDir = dir(strcat(rgStackPath, '*.tif'));
 
