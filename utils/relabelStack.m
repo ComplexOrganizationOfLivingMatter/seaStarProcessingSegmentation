@@ -1,5 +1,11 @@
 function [img2] = relabelStack(img)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% relabelStack
+% Function for relabeling segmented images
+% The input is the labeled image, the output is the relabeled one.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 uniqueLabels = unique(img);
 
 img2=img;
