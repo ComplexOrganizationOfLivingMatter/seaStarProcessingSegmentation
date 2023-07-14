@@ -114,6 +114,16 @@ D:\Path\to\curvatureAnalysis\data   <br />
 │   └── ...                          # etc. <br />
 └── ... <br />
 
+
+#### .mat table structure
+
+| ID_Tissue | Major_Axis | Major_Axis | Minor_Axis | Avg_CellHeight |
+|-----------|------------|------------|------------|----------------|
+| tissue_1  | 123.45     | 123.45     | 123.45     | 123.45         |
+| ...       | ...        | ...        | ...        | ...            |
+|           |            |            |            |                |
+
+
 ## Voronoi
 codes inside: 
 seaStarProcessingSegmentation/Voronoi/
