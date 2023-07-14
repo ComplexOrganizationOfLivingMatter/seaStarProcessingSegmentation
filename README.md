@@ -123,6 +123,7 @@ D:\Path\to\curvatureAnalysis\data   <br />
 | ...       | ...        | ...        | ...        | ...            |
 |           |            |            |            |                |
 
+Note: There is two major axis columns since we assume oblate embryoids.
 
 ## Voronoi
 codes inside: 
