@@ -1,13 +1,53 @@
 function [] = mainCurvatureInEmbryoSurface(condition)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% mainCurvatureInEmbryoSurface
+% Main code for curvature analysis of the SeaStar embryo.
+% Coordinates of outter layer cell centroids and inner layer
+% cell centroids are needed.
+% Inner layer and outer layer can be
+% extracted using getInnerOuterLateralFromEmbryos
+% An excell file with estimated info of all 3 principal axes of the embryo
+% are needed as well as estimated mean cell height. This was done
+% manually using FIJI.
+% 
+% inPath directory should have a folder for each movie. Inside those
+% folders, a folder for each one of the 3 stages.
+% Then, inside those folders, all timepoints (.tif) and a .mat file with
+% relevant information of the original images. This can be extracted using
+% mainSegmentation.m
+% 
+% EXAMPLE:
+% 
+% D:\Path\to\curvatureAnalysis\data    
+%   excelFile.xls
+%   > movie1
+%       originalImageName.mat
+%       > stage128
+%              timepoint1.tif
+%              timepoint2.tif
+%              ...
+%       > stage256
+%              ...
+%       > stage512
+%              ...
+% > movie2
+%       ...
+% > movie3
+%       ...
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 addpath(genpath('src'))
 addpath(genpath('lib'))
 
 close all
 
-inPath = uigetdir('D:\Antonio\seaStar\curvatureAnalysis\data\');
+inPath = uigetdir('D:\Path\to\curvatureAnalysis\data');
 
-[excelTableName, excelPath] = uigetfile('D:\Antonio\seaStar\curvatureAnalysis\data\', 'Select excel table');
+% ui to select table
+[excelTableName, excelPath] = uigetfile('D:\Path\to\curvatureAnalysis\data\', 'Select excel table');
 disp(excelTableName)
 excelPath = strcat(excelPath, excelTableName);
 
@@ -46,7 +86,7 @@ for nEmbryos=1:length(embryosFiles)
         if exist(fullfile(segmentPath, strcat(fileName{1},'_curvatureAB.mat')))==0
             
             [segmentedImage] = readStackTif(strcat(segmentPath,'\',segmentName));
-            [apicalLayer,basalLayer,~,~]=resizeTissue(segmentPath,fileName{1},double(segmentedImage),z_Scale,0);% inverse apical and basal layers
+            [apicalLayer,basalLayer,~,~]=getInnerOuterLateralFromEmbryos(segmentPath,fileName{1},double(segmentedImage),z_Scale,0);% inverse apical and basal layers
             
             %% Calculate centroids of apical and basal validRegions
             apicalCentroids=regionprops3(apicalLayer,'Centroid');
@@ -102,17 +142,9 @@ for nEmbryos=1:length(embryosFiles)
             generalInfo.R2Apical(nCentroid-1)=R2Apical;
             generalInfo.R1Basal(nCentroid-1)=R1Basal;
             generalInfo.R2Basal(nCentroid-1)=R2Basal;
-             
-%             apicalSurfCoordenates=[xA yA zA];
-%             basalSurfCoordenates=[xB yB zB];
-%             apicalRadiiLengths=[apicalA apicalB apicalC];
-%             basalRadiiLengths=[basalA basalB basalC];
-%             
-%             curvatureInputs=table(apicalSurfCoordenates,basalSurfCoordenates,apicalRadiiLengths,basalRadiiLengths,R1Apical,R2Apical,R1Basal,R2Basal,SR1,SR2);
-%             
-%             allCurvatureInputs{maxFile+nFiles,1} = table2array(curvatureInputs);
-            
+         
             end
+            
             meanCurvFeatures=[mean(generalInfo.anisotropyCurvatureRatio) mean(generalInfo.R1Apical) mean(generalInfo.R2Apical) mean(generalInfo.R1Basal) mean(generalInfo.R2Basal)];
             tissueGeneralInfo{maxFile+nFiles,2} = meanCurvFeatures;
             save(fullfile(segmentPath, strcat(fileName{1},'_curvatureAB.mat')), 'generalInfo','meanCurvFeatures');
