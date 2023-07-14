@@ -1,5 +1,21 @@
 function [allGeneralInfo,tissue3dFeatures,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage,innerLayer,outerLayer,lateralLayer,path2save,fileName,pixelScale,validCells,noValidCells)
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % calculate3DMorphologicalFeatures
+    % Function to calculate 3D morphological features
+    %
+    % INPUTS
+    % labelledImage: Segmented image
+    % innerLayer: Extracted from getInnerOuterLateralFromEmbryos function
+    % outerLayer: Extracted from getInnerOuterLateralFromEmbryos function
+    % lateralLayer: Extracted from getInnerOuterLateralFromEmbryos function
+    % path2save: path to save output data
+    % fileName: fileName to save output data
+    % pixelScale: Ratio pixe to micron
+    % validCells: Cells that are gonna be measured
+    % noValidCells: Cells that are gonna be ommited
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     if ~exist(path2save,'dir')
         mkdir(path2save)
     end
