@@ -1,5 +1,13 @@
 function writeStackTif(img,fileName)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% writeStackTif
+% Function to write stack images as tif file.
+% INPUTS:
+% img: stack image
+% fileName: full path (including fileName and '.tif')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if iscategorical(img)
     img=double(img);
     img(isnan(img))=0;
