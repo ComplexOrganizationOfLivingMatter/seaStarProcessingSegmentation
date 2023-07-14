@@ -1,4 +1,25 @@
-%% First pipeline to modify mistakes on S. Glands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% mainfeaturesExtractionBulk
+% Same as mainSegmentation but for processing
+% several folders.
+% Main code for extracting sea star cellular features
+% from segmentations. Segmentations should be
+% in .tif or .tiff format.
+% Some paths must be changed by user --> inPath
+% Both raw images and segmented images should be
+% inside each one of the inPath folders
+% 
+% EXAMPLE
+% 
+% fullPathTo\SeaStarSegmentations
+%         > segmentedImages
+%               >SegmentedImg1.tif
+%               >SegmentedImg2.tif
+%         > originalImages
+%               >OriginalImg1.tif
+%               >OriginalImg2.tif
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 addpath(genpath('src'))
 addpath(genpath('lib'))
 
@@ -42,7 +63,7 @@ for nEmbryos=1:length(embryosFiles)
         segmentedImage=imresize3(segmentedImage,[size(segmentedImage,1:2) (size(segmentedImage,3)-1)],'nearest');
         segmentedImage(segmentedImage==1)=0;
         segmentedImage=double(segmentedImage);
-        [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=resizeTissue(segmentPath,segmentName,segmentedImage,z_Scale); 
+        [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=getInnerOuterLateralFromEmbryos(segmentPath,segmentName,segmentedImage,z_Scale); 
         
         contactThreshold=0.5;
         validCells=unique(labelledImage);
