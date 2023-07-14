@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% mainvoronoiPacking
+% Whole voronoi packing processing for comparing voronoi models against
+% real data.
+% Uses makeVoronoiPacking function
+% 
+% User must change some paths.
+% 
+% Inside inPath directory, the scheme should be like this one:
+% 
+% \Path\to\imageFolder\
+%         > segmentedImages
+%               >SegmentedImg1.tif
+%               >SegmentedImg2.tif
+%         > originalImages
+%               >OriginalImg1.tif
+%               >OriginalImg2.tif
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 addpath(genpath('src'))
 addpath(genpath('lib'))
@@ -5,8 +24,8 @@ addpath(genpath('lib'))
 clear all
 close all
 
-inPath = uigetdir('E:\Antonio\SeaStar Proyect\SeaStar_Segmentation\animalEmbryos\20200114_pos1');
-outPath = uigetdir('E:\Antonio\SeaStar Proyect\SeaStar_Segmentation\animalEmbryos\20200114_pos1');
+inPath = uigetdir('E:\Path\to\imageFolder\');
+outPath = uigetdir('E:\Path\to\save\processed\images');
 
 embryosFiles=dir(inPath);
 dirEmbryos = [embryosFiles.isdir];
@@ -16,8 +35,6 @@ embryosFiles = subDirs(3:end);
 for nEmbryos=1:length(embryosFiles)
     segmentedEmbryosFiles = dir(strcat(embryosFiles(nEmbryos).folder,'\',embryosFiles(nEmbryos).name,'\segmentedImages\*.tif*'));
     originalEmbryosFiles = dir(strcat(embryosFiles(nEmbryos).folder,'\',embryosFiles(nEmbryos).name,'\originalImages\*.tif*'));
-%     segmentedEmbryosFiles = dir(strcat(embryosFiles(nEmbryos).folder,'\',embryosFiles(nEmbryos).name,'\512\*.tif*'));
-%     originalEmbryosFiles = dir(strcat(embryosFiles(nEmbryos).folder,'\',embryosFiles(nEmbryos).name,'\',embryosFiles(nEmbryos).name,'.mat'));
  embryoPath=strcat(outPath,'\',embryosFiles(nEmbryos).name);    
     if exist(embryoPath,'file') ~=7
         mkdir(outPath, embryosFiles(nEmbryos).name)
@@ -38,7 +55,7 @@ for nEmbryos=1:length(embryosFiles)
         
         %make Voronoi models
         [voronoiCyst]=makeVoronoiModels(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
-        [basalLayer,apicalLayer,lateralLayer,voronoiCyst]=resizeTissue(embryoPath,fileName{1},voronoiCyst,1,0);
+        [basalLayer,apicalLayer,lateralLayer,voronoiCyst]=getInnerOuterLateralFromEmbryos(embryoPath,fileName{1},voronoiCyst,1,0);
         voronoiCystResized=imresize3(voronoiCyst,[size(originalImage,1:2) size(originalImage,3)*z_Scale],'nearest'); %Voronoi same size embryo
         
         %select valid cells
