@@ -1,6 +1,3 @@
-data/*
-results/*
-Images/*
 *.tif
 *.tiff
 *.yaml
