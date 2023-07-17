@@ -1,5 +1,5 @@
 # seaStarProcessingSegmentation
-![RepositoryPresentation](https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/images/segmentedSeaStarWt.gif)
+![RepositoryPresentation](https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/main/images/segmentedSeaStarWt.gif)
 
 ## Main codes
 
