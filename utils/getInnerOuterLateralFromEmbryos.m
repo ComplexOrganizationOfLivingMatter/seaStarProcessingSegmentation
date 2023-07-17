@@ -22,7 +22,7 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
     % labelledImage_realSize: homogenized sea star embryo image
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    if exist(fullfile(segmentedPath,strcat(fileName,'.mat')), 'file') == 0
+    if exist(fullfile(segmentedPath,'realSize3dLayers.mat')) == 0
 
         %% Step 1: Resize image stacks
         labelledImage_realSize  = imresize3(correctLabelledImage, [size(correctLabelledImage,1) size(correctLabelledImage,2) z_Scale*size(correctLabelledImage,3)], 'nearest');
@@ -70,10 +70,10 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
         lateralLayer(outerLayer>0 | innerLayer>0) = 0;
 
         if saveRequest==1
-            save(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','apicalLayer','basalLayer','lateralLayer', '-v7.3');
+            save(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','outerLayer','innerLayer','lateralLayer', '-v7.3');
         end
     else
-        load(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','apicalLayer','basalLayer','lateralLayer')
+        load(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','outerLayer','innerLayer','lateralLayer')
     end
 
 end

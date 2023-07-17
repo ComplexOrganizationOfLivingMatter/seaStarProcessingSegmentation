@@ -104,7 +104,7 @@ end
         validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
         
 if z_Scale>1  
-    [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,contactThreshold,validCells,noValidCells);
+    [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,validCells,noValidCells);
 else
      [apicalLayer,basalLayer,lateralLayer,lumenImage] = getInnerOuterLateralFromEmbryos(segmentedImageResized,segmentedPath);
      [scutoids_cells,validScutoids_cells,surfaceRatio3D]=calculateScutoidsAndSR(labelledImage,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},2,5,validCells);

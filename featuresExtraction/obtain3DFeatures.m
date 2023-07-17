@@ -4,15 +4,9 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
         %% Cellular features       
         lateralLayerAux = lateralLayer;
         lateralLayerAux(labelledImage==0)=0;
-        
-        if ~isequal(lateralLayer, lateralLayerAux)
-            %%the threshold is only applied in the full lateral surface
-            [lateral3dInfoAux,totalLateralCellsArea,absoluteLateralContacts] = getLateralContacts(lateralLayerAux,dilatedVx,0);
-            lateral3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo_total,lateral3dInfoAux,'UniformOutput',false);
-        else
-            lateral3dInfo = lateral3dInfo_total;
-            clearvars lateral3dInfo_total lateralLayerAux
-        end
+
+        [~,totalLateralCellsArea,~] = getLateralContacts(lateralLayerAux,2,0.5);
+
 
         %check for non considered valid cells, and delete cells "0" volume
         missingCells = find(totalLateralCellsArea==0);

@@ -34,7 +34,7 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio]
     
     totalInnerArea=sum(basal_area_cells(validCells));
     totalOuterArea=sum(apical_area_cells(validCells));
-    meanSurfaceRatio =  / ;
+    meanSurfaceRatio =  totalOuterArea/totalInnerArea ;
 
     %%  Calculate volume cells
     volume_cells=table2array(regionprops3(labelledImage,'Volume'));
