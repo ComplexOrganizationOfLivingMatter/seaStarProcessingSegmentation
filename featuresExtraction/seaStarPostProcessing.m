@@ -29,7 +29,7 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     outputName=strsplit(outputName{1},'.tif');
     segmentedPath=strcat(segmentedPath,'\',outputName{1});
     
-    if exist(strcat(segmentedPath,'\',outputName{1},'.mat'),'file')==0
+    if exist(strcat(segmentedPath,'\stackResolution.mat'),'file')==0
         
         pixelWidth=1/unique([imgInfo.XResolution]);
         
@@ -44,7 +44,7 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
             pixel_Scale = pixelWidth;
             
             
-            save(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale');
+            save(strcat(segmentedPath,'\stackResolution.mat'),'z_Scale','pixel_Scale');
             
         catch
             disp('error')
@@ -55,7 +55,7 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
         end
         
     else
-        load(strcat(segmentedPath,'\',outputName{1},'.mat'),'z_Scale','pixel_Scale');
+        load(strcat(segmentedPath,'\stackResolution.mat'),'z_Scale','pixel_Scale');
     end
     
     %Check if lumen is segmented as a enormous cell. If so, remove it.

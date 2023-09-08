@@ -3,7 +3,7 @@ function [meanFeatures,stdFeatures, tissue3dFeatures] = convertPixelsToMicrons(m
     %   Detailed explanation goes here
     volumeSubstring={'Volume','volume'};
     areaSubstring={'Area', 'area'};
-    lengthSubstring={'length','Length'};
+    lengthSubstring={'length','Length','height','Height'};
     heightSubstring={'height','Height'};
 
 
@@ -29,16 +29,11 @@ function [meanFeatures,stdFeatures, tissue3dFeatures] = convertPixelsToMicrons(m
 
     %% Length Features
     CellsFeaturesLengthIndexs = contains(meanFeatures.Properties.VariableNames,lengthSubstring);
-    CellsFeaturesHeightIndexs = contains(meanFeatures.Properties.VariableNames,heightSubstring);
     TissueFeaturesLengthIndexs = contains(tissue3dFeatures.Properties.VariableNames,lengthSubstring);
 
-    meanFeatures(:,CellsFeaturesLengthIndexs) = table(table2array(meanFeatures(:,CellsFeaturesLengthIndexs)) * pixelScale);
-    stdFeatures(:,CellsFeaturesLengthIndexs) = table(table2array(stdFeatures(:,CellsFeaturesLengthIndexs)) * pixelScale);
-
-    meanFeatures(:,CellsFeaturesHeightIndexs) = table(table2array(meanFeatures(:,CellsFeaturesHeightIndexs)) * pixelScale);
-    stdFeatures(:,CellsFeaturesHeightIndexs) = table(table2array(stdFeatures(:,CellsFeaturesHeightIndexs)) * pixelScale);
-
-    tissue3dFeatures(:,TissueFeaturesLengthIndexs) = table(table2array(tissue3dFeatures(:,TissueFeaturesLengthIndexs)) * pixelScale);
+    meanFeatures(:,CellsFeaturesLengthIndexs) = splitvars(table(table2array(meanFeatures(:,CellsFeaturesLengthIndexs)) * pixelScale),1);
+    stdFeatures(:,CellsFeaturesLengthIndexs) = splitvars(table(table2array(stdFeatures(:,CellsFeaturesLengthIndexs)) * pixelScale),1);
+    tissue3dFeatures(:,TissueFeaturesLengthIndexs) = splitvars(table(table2array(tissue3dFeatures(:,TissueFeaturesLengthIndexs)) * pixelScale),1);
 %     lumen3dFeatures(:,TissueFeaturesLengthIndexs) = table(table2array(lumen3dFeatures(:,TissueFeaturesLengthIndexs)) * pixelScale);
 %     hollowTissue3dFeatures(:,TissueFeaturesLengthIndexs) = table(table2array(hollowTissue3dFeatures(:,TissueFeaturesLengthIndexs)) * pixelScale);
 

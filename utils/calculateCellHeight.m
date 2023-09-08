@@ -1,7 +1,7 @@
-function cell_heights = calculateCellHeight(apicalLayer, basalLayer)
+function cell_heights = calculateCellHeight(innerLayer, outerLayer)
    
-    centroidsApical = table2array(regionprops3(apicalLayer,'Centroid'));
-   	centroidsBasal = table2array(regionprops3(basalLayer,'Centroid'));
+    centroidsApical = table2array(regionprops3(innerLayer,'Centroid'));
+   	centroidsBasal = table2array(regionprops3(outerLayer,'Centroid'));
     
     centroidsApicalAux = centroidsApical;
     centroidsBasalAux = centroidsBasal;
@@ -23,8 +23,8 @@ function cell_heights = calculateCellHeight(apicalLayer, basalLayer)
     for idCell = 1:length(cell_heights)
         if ~isnan(centroidsApical(idCell,1)) && ~isnan(centroidsBasal(idCell,1))
             %get all apical cell voxels
-            idsApical = find(apicalLayer==idCell);
-            [rowApical, colApical, zApical] = ind2sub(size(apicalLayer),idsApical);
+            idsApical = find(innerLayer==idCell);
+            [rowApical, colApical, zApical] = ind2sub(size(innerLayer),idsApical);
             
             %calculate the closest apical pixel to the calculated apical centroid
             distCoord = pdist2([colApical,rowApical, zApical],centroidsApical(idCell,:));
@@ -32,8 +32,8 @@ function cell_heights = calculateCellHeight(apicalLayer, basalLayer)
             centroidsApicalAux(idCell,:)= [colApical(idSeedMin),rowApical(idSeedMin), zApical(idSeedMin)];
             
             %get all basal cell voxels
-            idsBasal = find(basalLayer==idCell);
-            [rowBasal, colBasal, zBasal] = ind2sub(size(basalLayer),idsBasal);
+            idsBasal = find(outerLayer==idCell);
+            [rowBasal, colBasal, zBasal] = ind2sub(size(outerLayer),idsBasal);
             
             %calculate the closest basal voxel to the calculated basal centroid
             distCoord = pdist2([colBasal,rowBasal, zBasal],centroidsBasal(idCell,:));

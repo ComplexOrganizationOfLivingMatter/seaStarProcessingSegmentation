@@ -1,4 +1,4 @@
-function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surfaceRatio3D, validCells] = obtain3DFeatures(labelledImage,apicalLayer,basalLayer,lateralLayer,validCells,noValidCells,path2save)
+function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surfaceRatio3D, validCells] = obtain3DFeatures(labelledImage,outerLayer,innerLayer,lateralLayer,validCells,noValidCells,path2save)
     if ~exist(fullfile(path2save, 'morphological3dFeatures.mat'),'file')
 
         %% Cellular features       
@@ -23,37 +23,28 @@ function [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surface
         validCells=validCells';
         
         %% Obtain cells descriptors
-        % get cell size descriptors
-        [cellularFeaturesValidCells,CellularFeaturesAllCells,surfaceRatio3D] = calculate_CellularFeatures(apicalLayer,basalLayer,labelledImage,totalLateralCellsArea,absoluteLateralContacts,noValidCells,validCells);
-        %%Extract cell shape descriptors
-        [cells3dFeatures] = extract3dDescriptors(labelledImage, validCells);
+        % Extract cell size and shape descriptors
+        [cellularFeaturesValidCells,CellularFeaturesAllCells,surfaceRatio3D,totalOuterArea,totalInnerArea] = calculate_CellularFeatures(outerLayer,innerLayer,labelledImage,totalLateralCellsArea,noValidCells,validCells);
 
         %% Obtain Tissue descriptors
         validLabelledImage=labelledImage;
         for nCell=1:length(noValidCells)
             validLabelledImage(labelledImage==noValidCells(nCell))=0;
         end
-        [tissue3dFeatures] = extract3dDescriptors(validLabelledImage>0, 1);
+        
+        [tissue3dFeatures,~,~] = calculate_CellularFeatures([],[],validLabelledImage>0,[],[],1);
         tissue3dFeatures.ID_Cell = 'Tissue';
-
-        %refactor purely voxels measurement to be compared with the surface
-        %area extraction 
-        sumApicalAreas = sum(CellularFeaturesAllCells.Apical_area);
-        sumBasalAreas = sum(CellularFeaturesAllCells.Basal_area);
-        refactorBasalAreas = sumBasalAreas/tissue3dFeatures.SurfaceArea;
-        refactorApicalAreas = sumApicalAreas/lumen3dFeatures.SurfaceArea;
+        tissueSurfaces=table(totalOuterArea,totalInnerArea);
+        tissueSurfaces.Properties.VariableNames = {'outer_surfaceArea','inner_surfaceArea'};
+        tissue3dFeatures=horzcat(tissue3dFeatures,tissueSurfaces);
         
-        lateralAreas = cells3dFeatures.SurfaceArea - (cellularFeaturesValidCells.Apical_area./refactorApicalAreas) - (cellularFeaturesValidCells.Basal_area./refactorBasalAreas);
-        refactorLateralAreas = cellularFeaturesValidCells.Lateral_area./lateralAreas;
-        
-        cellAreaNeighsInfo = table(cellularFeaturesValidCells.Apical_area,cellularFeaturesValidCells.Basal_area,cellularFeaturesValidCells.Cell_height,cellularFeaturesValidCells.Lateral_area./refactorLateralAreas,'VariableNames',{'apical_Area','basal_Area','cell_height','lateral_Area'});
-        cells3dFeatures = horzcat(cells3dFeatures,cellAreaNeighsInfo);
+        cells3dFeatures = cellularFeaturesValidCells;
 
         %% Save variables
-        save(fullfile(path2save, 'morphological3dFeatures.mat'), 'cells3dFeatures', 'tissue3dFeatures', 'cellularFeaturesValidCells','CellularFeaturesAllCells', 'numValidCells','numTotalCells', 'surfaceRatio3D');
+        save(fullfile(path2save, 'morphological3dFeatures.mat'), 'cells3dFeatures', 'tissue3dFeatures', 'CellularFeaturesAllCells', 'numValidCells','numTotalCells', 'surfaceRatio3D');
 
     else
-        load(fullfile(path2save, 'morphological3dFeatures.mat'), 'cells3dFeatures', 'tissue3dFeatures','cellularFeaturesValidCells','CellularFeaturesAllCells', 'numValidCells','numTotalCells', 'surfaceRatio3D');        
+        load(fullfile(path2save, 'morphological3dFeatures.mat'), 'cells3dFeatures', 'tissue3dFeatures', 'numValidCells','numTotalCells', 'surfaceRatio3D');        
     end
 end
 

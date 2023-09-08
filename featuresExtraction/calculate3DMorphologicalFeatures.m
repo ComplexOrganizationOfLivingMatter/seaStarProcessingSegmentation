@@ -31,8 +31,8 @@ function [allGeneralInfo,tissue3dFeatures,totalMeanCellsFeatures,totalStdCellsFe
         [cells3dFeatures, tissue3dFeatures,numValidCells,numTotalCells, surfaceRatio3D, ~] = obtain3DFeatures(labelledImage,innerLayer,outerLayer,lateralLayer,validCells,noValidCells,path2save);
         
         %% Calculate mean and std of 3D features
-        meanCellsFeatures = varfun(@(x) mean(x),cells3dFeatures(:, (2:end-2)));
-        stdCellsFeatures = varfun(@(x) std(x),cells3dFeatures(:,(2:end-2)));
+        meanCellsFeatures = varfun(@(x) mean(x),cells3dFeatures(:, (2:end)));
+        stdCellsFeatures = varfun(@(x) std(x),cells3dFeatures(:,(2:end)));
 
         % Voxels/Pixels to Micrometers
         [totalMeanCellsFeatures,totalStdCellsFeatures, tissue3dFeatures] = convertPixelsToMicrons(meanCellsFeatures,stdCellsFeatures, tissue3dFeatures,pixelScale);
