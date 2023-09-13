@@ -29,12 +29,17 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio,
         inner_area_cells=cell2mat(struct2cell(regionprops(innerLayer,'Area'))).';
         lateral_area_cells = totalLateralCellsArea;
         
-        if size(outer_area_cells)>size(inner_area_cells)
+        if size(outer_area_cells,1)>size(inner_area_cells,1)
             inner_area_cells(size(inner_area_cells,1)+1:size(outer_area_cells,1))=0;
-        elseif size(outer_area_cells)<size(inner_area_cells)
+        elseif size(outer_area_cells,1)<size(inner_area_cells,1)
             outer_area_cells(size(outer_area_cells,1)+1:size(inner_area_cells,1))=0;
-        elseif size(lateral_area_cells)<size(inner_area_cells)
+        end
+        
+        if size(lateral_area_cells,1)<size(inner_area_cells,1)
             lateral_area_cells(size(lateral_area_cells,1)+1:size(inner_area_cells,1))=0;
+        elseif size(outer_area_cells,1)<size(lateral_area_cells,1)
+            outer_area_cells(size(outer_area_cells,1)+1:size(lateral_area_cells,1))=0;
+            inner_area_cells(size(inner_area_cells,1)+1:size(lateral_area_cells,1))=0;
         end
         
         totalInnerArea=sum(inner_area_cells(validCells));

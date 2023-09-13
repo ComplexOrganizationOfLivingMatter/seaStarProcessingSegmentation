@@ -106,8 +106,8 @@ end
 if z_Scale>1  
     [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,validCells,noValidCells);
 else
-     [apicalLayer,basalLayer,lateralLayer,lumenImage] = getInnerOuterLateralFromEmbryos(segmentedImageResized,segmentedPath);
-     [scutoids_cells,validScutoids_cells,surfaceRatio3D]=calculateScutoidsAndSR(labelledImage,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},2,5,validCells);
+     [apicalLayer,basalLayer,lateralLayer,lumenImage] = getInnerOuterLateralFromEmbryos(segmentedPath,outputName{1}, labelledImage_realSize,z_Scale,0);
+     [scutoids_cells,validScutoids_cells,surfaceRatio3D]=calculateScutoidsAndSR( labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},2,5,validCells);
      allGeneralInfo = cell2table([{outputName{1}}, {surfaceRatio3D}, {length(validCells)},{max(max(max(labelledImage_realSize)))}],'VariableNames', {'ID_Glands', 'SurfaceRatio3D_areas', 'NCells_valid','NCells_total'});
      totalMeanCellsFeatures=cell2table([{mean(scutoids_cells)}, {mean(validScutoids_cells)}],'VariableNames', {'totalScutoids', 'validScutoids'});
     allTissues=[];
