@@ -24,7 +24,7 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     
     [originalImage,imgInfo] = readStackTif(strcat(originalImgPath,'\',imageName));
     
-    
+    segmentPath=segmentedPath;
     outputName=strsplit(segmentedImageName,'_itkws');
     outputName=strsplit(outputName{1},'.tif');
     segmentedPath=strcat(segmentedPath,'\',outputName{1});
@@ -104,6 +104,12 @@ end
         validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
         
 if z_Scale>1  
+    if exist(fullfile(segmentPath, 'validRegionStks')) ~=7
+        mkdir(segmentPath, 'validRegionStks')
+    end
+     
+    exportValidRegion(strcat(segmentPath,'/validRegionStks'),outputName{1},segmentedImageResized,originalImage,ones(length(validCells),1),validCells);
+   
     [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,validCells,noValidCells);
 else
      [apicalLayer,basalLayer,lateralLayer,lumenImage] = getInnerOuterLateralFromEmbryos(segmentedPath,outputName{1}, labelledImage_realSize,z_Scale,0);

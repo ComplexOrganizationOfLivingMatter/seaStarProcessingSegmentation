@@ -21,9 +21,9 @@ for nCell=1:length(valid_scutoids)
         resizedLabelledImage(resizedLabelledImage==validCells(nCell))=1;
     end
 end
-
+if ~all(valid_scutoids)
 writeStackTif(uint16(resizedLabelledImage), strcat(path2save,'\','validScutoids_',fileName,'.tif'));
-
+end
 
 end
 
