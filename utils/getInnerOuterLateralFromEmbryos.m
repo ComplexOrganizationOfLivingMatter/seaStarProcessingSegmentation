@@ -50,13 +50,13 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
         % Dilate and compare labels
         se = strel('sphere',2);
         dilatedApicalChunk = imdilate(innerChunk, se);
-        innerLayer = dilatedApicalChunk.*binaryLabels;
+        outerLayer = dilatedApicalChunk.*binaryLabels;
 
         % To get apical layer, make inverse matrix and repeat the process
         inverseBinaryChunk = ones(size(binaryChunk))-binaryChunk;
         se = strel('sphere',2);
         dilatedInverseBinaryChunk = imdilate(inverseBinaryChunk, se);
-        outerLayer = dilatedInverseBinaryChunk.*binaryLabels;
+        innerLayer = dilatedInverseBinaryChunk.*binaryLabels;
 
         innerLayer = innerLayer.*labelledImage_realSize;
         outerLayer = outerLayer.*labelledImage_realSize;
