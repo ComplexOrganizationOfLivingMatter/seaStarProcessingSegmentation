@@ -69,6 +69,14 @@ function [CellularFeaturesValidCells,CellularFeaturesAllCells, meanSurfaceRatio,
     %%  Export to a excel file
     ID_cells=unique([validCells; noValidCells]);
     
+    if length(ID_cells)==1
+       volume_cells = max(volume_cells);
+       surface_area_cells = max(surface_area_cells);
+       convexityRatio_cells = max(convexityRatio_cells);
+       aspectRatio = max(aspectRatio);
+       cellsAxesLength([2:end],:) = [];
+    end
+    
     CellularFeaturesAllCells=table(ID_cells,volume_cells,surface_area_cells,convexityRatio_cells,aspectRatio,cellsAxesLength.PrincipalAxisLength(:,1),cellsAxesLength.PrincipalAxisLength(:,2),cellsAxesLength.PrincipalAxisLength(:,3));
     CellularFeaturesAllCells.Properties.VariableNames = {'ID_Cell','Volume','SurfaceArea','Convexity_Ratio','Aspect_Ratio','MajorAxis_Length','2Axis_Length','MinorAxis_Length'};
     
