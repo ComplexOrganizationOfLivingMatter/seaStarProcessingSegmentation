@@ -44,7 +44,7 @@ function paint3D(varargin)
         figure;
         if prettyGraphics == 3
             % For label images, call the specific regionIsosurfaces
-            [meshes, ~] = regionIsosurfaces(labelledImage, 'smoothRadius', 1.2);
+            [meshes, ~] = regionIsosurfaces(labelledImage, 'smoothRadius', 2);
             % display each mesh with color specified by colormap of doc
             for iLabel = 1:length(meshes)
                 p = patch(meshes{iLabel});

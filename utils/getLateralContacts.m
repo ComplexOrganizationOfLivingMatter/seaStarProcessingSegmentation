@@ -1,8 +1,8 @@
 function [neighsFiltered,totalLateralCellsArea,absoluteLateralContacts] = getLateralContacts(lateralLayer,dilatedPixels,contactThreshold)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-    se = strel('cuboid', [dilatedPixels,dilatedPixels,dilatedPixels]);
-%     se = strel('sphere', dilatedPixels);
+
+    se = strel('sphere',dilatedPixels);
     cells=1:max(max(max(lateralLayer)));
     
     totalLateralCellsArea = zeros(length(cells),1);
@@ -30,6 +30,7 @@ function [neighsFiltered,totalLateralCellsArea,absoluteLateralContacts] = getLat
         neighs_real{cells(numCell), 1} = uniqueNeighs;
         
         percentageLateralContacts{numCell}=arrayfun(@(x) 100*(sum(neighCellsLabels==x)/length(neighCellsLabels)), uniqueNeighs);
+        
         %%filter minimal contacts
         id2Filter = percentageLateralContacts{numCell}<contactThreshold;
         neighs2delete{cells(numCell), 1} = unique([neighs2delete{cells(numCell), 1};uniqueNeighs(id2Filter) ]);
@@ -48,4 +49,3 @@ function [neighsFiltered,totalLateralCellsArea,absoluteLateralContacts] = getLat
     
     neighsFiltered = cellfun(@(x,y) setxor(x,y),neighs_real,neighs2delete,'UniformOutput',false)';
 end
-

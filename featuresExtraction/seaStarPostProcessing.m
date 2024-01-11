@@ -50,8 +50,8 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
             disp('error')
             z_Scale=1;
             pixel_Scale=1;
-            originalImage=imresize3(originalImage,[512 512 512],'nearest');
-            segmentedImage=flip(segmentedImage,3);
+%             originalImage=imresize3(originalImage,[512 512 512],'nearest');
+%             segmentedImage=flip(segmentedImage,3);
         end
         
     else
@@ -71,10 +71,7 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     
     segmentedImage=double(segmentedImage);
     segmentedImageResized= imresize3(segmentedImage, [size(originalImage,1),size(originalImage,2),size(originalImage,3)],'nearest');    
-
-    cellProps = regionprops3(segmentedImageResized, "Centroid");
-
-    
+   
     for zIndex=1:size(segmentedImageResized,3)
        if max(max(max(segmentedImageResized(:,:,zIndex))))>0 
            break
@@ -82,17 +79,14 @@ function [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures
     end
     
     %% Select z distance to select valid cells
-    
-
-    contactThreshold=0.5;
-
 if z_Scale>1 
     [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize]=getInnerOuterLateralFromEmbryos(segmentedPath,outputName{1},segmentedImageResized,z_Scale,1);
 else
     labelledImage_realSize=segmentedImageResized;
 end    
-
+    
         zDistance=30; %30 microns
+
         zThreshold=(zDistance/pixel_Scale)+(zIndex*z_Scale); %Selecting zDistance from the first slice with cells
         cellProps = regionprops3(labelledImage_realSize, "Centroid");
         
@@ -102,8 +96,17 @@ end
         noValidCells=unique([noValidCells; indexEmpty]);
         
         validCells=setdiff(1:max(max(max(labelledImage_realSize))),noValidCells);
-        
-if z_Scale>1  
+
+        %%        Fixing number of Cells
+%         cellsLimit=79;
+%         cellProps.Centroid(:,4)=1:size(cellProps.Centroid,1);
+%         cellProps.Centroid=sortrows(cellProps.Centroid,3);
+%         validCells=sort(cellProps.Centroid(1:cellsLimit,4));
+%         validCells=validCells';
+%         noValidCells=setdiff(1:max(max(max(labelledImage_realSize))),validCells);        
+%         noValidCells=noValidCells';
+    
+%% Extract 3D features
     if exist(fullfile(segmentPath, 'validRegionStks')) ~=7
         mkdir(segmentPath, 'validRegionStks')
     end
@@ -111,22 +114,5 @@ if z_Scale>1
     exportValidRegion(strcat(segmentPath,'/validRegionStks'),outputName{1},segmentedImageResized,originalImage,ones(length(validCells),1),validCells);
    
     [allGeneralInfo,allTissues,totalMeanCellsFeatures,totalStdCellsFeatures]=calculate3DMorphologicalFeatures(labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},pixel_Scale,validCells,noValidCells);
-else
-     [basalLayer,apicalLayer,lateralLayer,labelledImage_realSize] = getInnerOuterLateralFromEmbryos(segmentedPath,outputName{1}, labelledImage_realSize,z_Scale,0);
-     [scutoids_cells,validScutoids_cells,surfaceRatio3D]=calculateScutoidsAndSR( labelledImage_realSize,apicalLayer,basalLayer,lateralLayer,segmentedPath,outputName{1},2,5,validCells);
-     allGeneralInfo = cell2table([{outputName{1}}, {surfaceRatio3D}, {length(validCells)},{max(max(max(labelledImage_realSize)))}],'VariableNames', {'ID_Glands', 'SurfaceRatio3D_areas', 'NCells_valid','NCells_total'});
-     totalMeanCellsFeatures=cell2table([{mean(scutoids_cells)}, {mean(validScutoids_cells)}],'VariableNames', {'totalScutoids', 'validScutoids'});
-    allTissues=[];
-    totalStdCellsFeatures=[];
-end
-    
-
-
- 
-
-
-
-    
-    
 end
 
