@@ -12,6 +12,8 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     % basalLayer: extracted from getInnerOuterLateralFromEmbryos
     % lateralLayer: extracted from getInnerOuterLateralFromEmbryos
     % path2save: path to save the info
+    % dilatedVx: dilatation of the cells to calculate neighbour per
+    % overlapping
     % contactThreshold: Threshold to decide if a cell is scutoid
     % validCells: Cells that are gonna be measured
     % pixel_Scale: pixel to micron ratio
@@ -28,7 +30,6 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     %defining all cells as valid cells
     if isempty(validCells)
         validCells = find(table2array(regionprops3(labelledImage,'Volume'))>0);
-        noValidCells = [];
     end
 
     %% Obtain 3D features from Cells, Tissue, Lumen and Tissue+Lumen
@@ -42,7 +43,6 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     if size(apical3dInfo.neighbourhood,1) < size(lateral3dInfo',1)
         for nCell=size(apical3dInfo.neighbourhood,1)+1:size(lateral3dInfo',1)
             apical3dInfo.neighbourhood{nCell}=[];
-
         end
     elseif size(apical3dInfo.neighbourhood,1) > size(lateral3dInfo',1)
         apical3dInfo.neighbourhood=apical3dInfo.neighbourhood(1:size(lateral3dInfo,2),1);
@@ -82,7 +82,6 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     basalLayerResized=imresize3(basalLayer,size(basalLayer)*4,'nearest');
     apical_area_cells=cell2mat(struct2cell(regionprops(apicalLayerResized,'Area'))).';
     basal_area_cells=cell2mat(struct2cell(regionprops(basalLayerResized,'Area'))).';
-    lateral_area_cells = totalLateralCellsArea;
 
     outerArea=sum(basal_area_cells(validCells));
     innerArea=sum(apical_area_cells(validCells));
@@ -93,17 +92,16 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     scutoids_cells = double(apicoBasalTransitions>0);
 
     %% Filter Scutoids
-    scutoids_cells = filterScutoids(apical3dInfo, basal3dInfo, lateral3dInfo, validCells);
-
+    [scutoids_cells,apical3dInfo,basal3dInfo,~] = filterScutoids(neighbours_data.Apical, neighbours_data.Basal, neighbours_data.Lateral, scutoids_cells,validCells);
     %% Correct apicoBasalTransitions
-    apicoBasalTransitions = apicoBasalTransitions.*scutoids_cells;
+    apicoBasalTransitions = cellfun(@(x, y) unique(vertcat(setdiff(y,x), setdiff(x,y))), apical3dInfo,basal3dInfo,'UniformOutput',false);
 
     validScutoids_cells=scutoids_cells(validCells);
     disp(mean(validScutoids_cells))
 
     packingFeatures=table(validCells, validScutoids_cells','VariableNames',{'ID_valid_cells' 'Valid_Scutoids'});
     %% Save variables
-    save(fullfile(path2save, strcat(fileName,'_scutoids.mat')), 'scutoids_cells','packingFeatures');
+    save(fullfile(path2save, strcat(fileName,'_scutoids.mat')), 'scutoids_cells','packingFeatures','apicoBasalTransitions');
 
 end
 
