@@ -1,8 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% mainvoronoiPacking
+% mainGetVoronoiModels
 % Whole voronoi packing processing for comparing voronoi models against
 % real data.
-% Uses makeVoronoiPacking function
+% Uses GetVoronoiModels function
 %
 % User must change some paths.
 %
