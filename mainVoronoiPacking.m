@@ -55,6 +55,7 @@ for nEmbryos=1:length(embryosFiles)
         [originalImage,imgInfo] = readStackTif(strcat(originalImagePath,'\',imageName));
         
         %extract scale and resize tissue.
+        try
         pixelWidth=1/unique([imgInfo.XResolution]);
         extractingSpacing = strsplit(imgInfo(1).ImageDescription, 'spacing=');
         extractingSpacing = extractingSpacing{2};
@@ -64,7 +65,15 @@ for nEmbryos=1:length(embryosFiles)
         
         z_Scale=pixelDepth/pixelWidth;
         pixel_Scale = pixelWidth;
+        catch
+            disp('warning there are not pixel and z scales'); 
+            z_Scale=1;
+            pixel_Scale = 1;
+        end
         
+        if isempty(z_Scale)
+            z_Scale=1;
+        end
         %Check if lumen is segmented as a enormous cell. If so, remove it.
         labelsVolume = regionprops3(segmentedImage, 'Volume');
         
@@ -77,7 +86,7 @@ for nEmbryos=1:length(embryosFiles)
         end
         
         segmentedImage=double(segmentedImage);
-        
+
         if exist(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\','voronoi_',fileName{1},'.mat'),'file')~=2
             if exist(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\','voronoi_',fileName{1},'.tif'),'file')~=2
                 % extract basal and apical layers
@@ -85,7 +94,7 @@ for nEmbryos=1:length(embryosFiles)
                 [basalLayer,apicalLayer,~,labelledImage]=getInnerOuterLateralFromEmbryos(embryoPath,fileName{1},segmentedImageResized,z_Scale,0);
                 
                 %make Voronoi models
-                [voronoiCyst]=makeVoronoiModels(originalImage,labelledImage,apicalLayer,basalLayer,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
+                [voronoiCyst]=makeVoronoiModels(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
             else
                 voronoiCyst=readStackTif(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\','voronoi_',fileName{1},'.tif'));
                 voronoiCyst=imresize3(double(voronoiCyst),([size(originalImage,1) size(originalImage,2) size(originalImage,3)*z_Scale]/4),'nearest');
@@ -95,6 +104,10 @@ for nEmbryos=1:length(embryosFiles)
             
             %select valid cells
             [numberTotalCells,validCells,numberValidCells,~]=filterValidRegion(voronoiCystResized,pixel_Scale);
+% try
+%             load(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\',fileName{1},'.mat'),'validCells')
+% catch
+% end
             save(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\','voronoi_',fileName{1},'.mat'),'numberTotalCells','validCells','numberValidCells','basalLayer','apicalLayer','lateralLayer','voronoiCyst')
         else
             load(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\','voronoi_',fileName{1},'.mat'),'numberTotalCells','validCells','numberValidCells','basalLayer','apicalLayer','lateralLayer','voronoiCyst')
@@ -102,6 +115,7 @@ for nEmbryos=1:length(embryosFiles)
         %Quantify scutoids
         dilatedVx=2;
         contactThreshold=3;
+        disp(numberTotalCells)
         [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(voronoiCyst,apicalLayer,basalLayer,lateralLayer,embryoPath,fileName{1},dilatedVx,contactThreshold,validCells,pixel_Scale); %input Voronoi homogeneised and reduced x4
         generalInfo= cell2table([{fileName(1)}, {surfaceRatio3D}, {numberValidCells},{numberTotalCells},{mean(scutoids_cells)},{mean(validScutoids_cells)},{outerArea},{innerArea}],'VariableNames', {'ID_Tissue', 'SurfaceRatio3D_areas', 'NCells_valid','NCells_total','Scutoids','valid_Scutoids','outer_Area','inner_Area'});
         allGeneralInfo{nFiles} = generalInfo;
