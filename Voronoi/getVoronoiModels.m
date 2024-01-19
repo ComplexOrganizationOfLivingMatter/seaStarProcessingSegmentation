@@ -1,4 +1,4 @@
-function [numberTotalCells,validCells,numberValidCells,basalLayer,apicalLayer,lateralLayer,voronoiCyst] = getVoronoiModels(outPath,originalEmbryosFiles,segmentedEmbryosFiles)
+function [numberTotalCells,validCells,numberValidCells,basalLayer,apicalLayer,lateralLayer,voronoiCyst] = getVoronoiModels(outPath,originalEmbryosFiles,segmentedEmbryosFiles,indx)
 
         % load embryos
         originalImagePath = originalEmbryosFiles.folder;
@@ -47,17 +47,20 @@ function [numberTotalCells,validCells,numberValidCells,basalLayer,apicalLayer,la
         if exist(strcat(outPath,'\','voronoi_',fileName{1},'.mat'),'file')~=2
             if exist(strcat(outPath,'\','voronoi_',fileName{1},'.tif'),'file')~=2
                 % extract basal and apical layers
-                segmentedImageResized= imresize3(segmentedImage, [size(originalImage,1),size(originalImage,2),size(originalImage,3)],'nearest');
-                 [~,~,~,labelledImage]=getInnerOuterLateralFromEmbryos(outPath,fileName{1},segmentedImageResized,z_Scale,0);
+                segmentedImageResized= imresize3(segmentedImage, [size(originalImage,1),size(originalImage,2),size(originalImage,3)*z_Scale],'nearest');
                 
                 %get Voronoi models
-%                 [voronoiCyst]=getVoronoiFrom3dCentroids(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
-
-nCells=298;
-[voronoiCyst] = getSynthethicCyst_mask(originalImage,labelledImage,outPath,fileName{1}, nCells, 0.5);
-
+                switch indx
+                    case 1
+                        [voronoiCyst]=getVoronoiFrom3dCentroids(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
+                    case 2
+                        [voronoiCyst]=getSegmentVoronoiFromApicalBasal(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
+                    case 3
+                        nCells=298;
+                        [voronoiCyst] = getSynthethicCyst_mask(originalImage,segmentedImageResized,outPath,fileName{1}, nCells, 0.5);
+                end
             else
-                voronoiCyst=readStackTif(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\','voronoi_',fileName{1},'.tif'));
+                voronoiCyst=readStackTif(strcat(outPath,'\','voronoi_',fileName{1},'.tif'));
                 voronoiCyst=imresize3(double(voronoiCyst),([size(originalImage,1) size(originalImage,2) size(originalImage,3)*z_Scale]/4),'nearest');
             end
             [basalLayer,apicalLayer,lateralLayer,voronoiCyst]=getInnerOuterLateralFromEmbryos(outPath,fileName{1},voronoiCyst,1,0);
