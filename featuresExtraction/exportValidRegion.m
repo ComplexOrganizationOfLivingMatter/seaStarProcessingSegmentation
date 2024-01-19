@@ -2,13 +2,13 @@ function exportValidRegion(path2save,fileName,labelledImage,originalImage,valid_
 
     noValidCells=setdiff(labelledImage,validCells);
     noValidCells(noValidCells==0)=[];
-    if ismember(1,validCells)
-        labelledImage(labelledImage==1)=max(max(max(labelledImage)))+1;
-        [index]=find(validCells==1);
-        validCells(index)=max(max(max(labelledImage)))+1;
-    end
+%     if ismember(1,validCells)
+%         labelledImage(labelledImage==1)=max(max(max(labelledImage)))+1;
+%         [index]=find(validCells==1);
+%         validCells(index)=max(max(max(labelledImage)))+1;
+%     end
     for nCell=1:length(noValidCells)
-        labelledImage(labelledImage==noValidCells(nCell))=1;
+        labelledImage(labelledImage==noValidCells(nCell))=0;
     end
     
     resizedLabelledImage=imresize3(labelledImage,size(originalImage),'nearest');
@@ -16,7 +16,7 @@ function exportValidRegion(path2save,fileName,labelledImage,originalImage,valid_
     
     for nCell=1:length(valid_scutoids)
         if valid_scutoids(nCell)==0
-            resizedLabelledImage(resizedLabelledImage==validCells(nCell))=1;
+            resizedLabelledImage(resizedLabelledImage==validCells(nCell))=max(max(max(labelledImage)))+1;
         end
     end
     if ~all(valid_scutoids)
