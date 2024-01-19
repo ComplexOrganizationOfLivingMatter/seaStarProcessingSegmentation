@@ -1,4 +1,4 @@
-function [voronoiCyst]=makeVoronoiModels(originalImage,labelledImage,outPath,fileName)
+function [voronoiCyst]=getVoronoiFrom3dCentroids(originalImage,labelledImage,outPath,fileName)
 
 if exist(strcat(outPath,'\','voronoi_',fileName,'.tif'),'file')~=2
 
