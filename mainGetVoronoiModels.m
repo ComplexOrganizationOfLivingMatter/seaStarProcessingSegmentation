@@ -61,7 +61,7 @@ for nEmbryos=1:length(embryosFiles)
     end
     
     summarizeAllTissuesProperties(allGeneralInfo,[],[],[],embryoPath,embryosFiles(nEmbryos).name,0);
-    break
+
 end
 
 

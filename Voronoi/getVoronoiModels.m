@@ -55,7 +55,7 @@ function [numberTotalCells,validCells,numberValidCells,innerLayer,outerLayer,lat
                         model='3D_Centroids';
                     case 2
                         nCells=182;
-                        [voronoiEmbryo] = getSynthethicCyst_mask(segmentedImageResized,outPath,fileName{1}, nCells, 0.5);
+                        [voronoiEmbryo] = getSynthethicEmbryo_mask(segmentedImageResized,outPath,fileName{1}, nCells, 0.5);
                         model='Random';
                     case 3
                         [voronoiEmbryo]=getSegmentVoronoiFromApicalBasal(segmentedImageResized,outPath,fileName{1}); %output Voronoi homogeneized but reduced x4    
