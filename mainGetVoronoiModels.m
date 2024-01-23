@@ -46,23 +46,22 @@ for nEmbryos=1:length(embryosFiles)
     allGeneralInfo = cell(size(segmentedEmbryosFiles,1),1);
     for nFiles=1:length(segmentedEmbryosFiles)
         %Get Voronoi From imaged embryo
-        [numberTotalCells,validCells,numberValidCells,basalLayer,apicalLayer,lateralLayer,voronoiCyst] = getVoronoiModels(embryoPath,originalEmbryosFiles(nFiles),segmentedEmbryosFiles(nFiles),indx);
+        [numberTotalCells,validCells,numberValidCells,innerLayer,outerLayer,lateralLayer,voronoiCyst,originalImage,fileName,pixel_Scale] = getVoronoiModels(embryoPath,originalEmbryosFiles(nFiles),segmentedEmbryosFiles(nFiles),indx);
         
         %Quantify scutoids
         dilatedVx=2;
         contactThreshold=3;
         disp(numberTotalCells)
-        [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(voronoiCyst,apicalLayer,basalLayer,lateralLayer,embryoPath,fileName{1},dilatedVx,contactThreshold,validCells,pixel_Scale); %input Voronoi homogeneised and reduced x4
+        [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(voronoiCyst,innerLayer,outerLayer,lateralLayer,embryoPath,fileName{1},dilatedVx,contactThreshold,validCells,pixel_Scale); %input Voronoi homogeneised and reduced x4
         generalInfo= cell2table([{fileName(1)}, {surfaceRatio3D}, {numberValidCells},{numberTotalCells},{mean(scutoids_cells)},{mean(validScutoids_cells)},{outerArea},{innerArea}],'VariableNames', {'ID_Tissue', 'SurfaceRatio3D_areas', 'NCells_valid','NCells_total','Scutoids','valid_Scutoids','outer_Area','inner_Area'});
         allGeneralInfo{nFiles} = generalInfo;
         
         %export valid region and scutoids
         exportValidRegion(embryoPath,fileName{1},voronoiCyst,originalImage,validScutoids_cells,validCells)
-        
     end
     
     summarizeAllTissuesProperties(allGeneralInfo,[],[],[],embryoPath,embryosFiles(nEmbryos).name,0);
-    
+    break
 end
 
 

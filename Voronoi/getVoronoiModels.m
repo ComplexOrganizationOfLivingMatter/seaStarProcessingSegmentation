@@ -1,6 +1,6 @@
-function [numberTotalCells,validCells,numberValidCells,basalLayer,apicalLayer,lateralLayer,voronoiCyst] = getVoronoiModels(outPath,originalEmbryosFiles,segmentedEmbryosFiles,indx)
+function [numberTotalCells,validCells,numberValidCells,innerLayer,outerLayer,lateralLayer,voronoiEmbryoResized,originalImage,fileName,pixel_Scale] = getVoronoiModels(outPath,originalEmbryosFiles,segmentedEmbryosFiles,indx)
 
-        % load embryos
+        %% load embryos
         originalImagePath = originalEmbryosFiles.folder;
         segmentPath = segmentedEmbryosFiles.folder;
         imageName=originalEmbryosFiles.name;
@@ -11,7 +11,7 @@ function [numberTotalCells,validCells,numberValidCells,basalLayer,apicalLayer,la
         [segmentedImage] = readStackTif(strcat(segmentPath,'\',segmentName));
         [originalImage,imgInfo] = readStackTif(strcat(originalImagePath,'\',imageName));
         
-        %extract scale and resize tissue.
+        %% extract scale.
         try
         pixelWidth=1/unique([imgInfo.XResolution]);
         extractingSpacing = strsplit(imgInfo(1).ImageDescription, 'spacing=');
@@ -45,36 +45,34 @@ function [numberTotalCells,validCells,numberValidCells,basalLayer,apicalLayer,la
         segmentedImage=double(segmentedImage);
 
         if exist(strcat(outPath,'\','voronoi_',fileName{1},'.mat'),'file')~=2
-            if exist(strcat(outPath,'\','voronoi_',fileName{1},'.tif'),'file')~=2
-                % extract basal and apical layers
+                %% resize tissue 
                 segmentedImageResized= imresize3(segmentedImage, [size(originalImage,1),size(originalImage,2),size(originalImage,3)*z_Scale],'nearest');
                 
-                %get Voronoi models
+                %% get Voronoi models
                 switch indx
                     case 1
-                        [voronoiCyst]=getVoronoiFrom3dCentroids(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
+                        [voronoiEmbryo]=getVoronoiFrom3dCentroids(segmentedImageResized,outPath,fileName{1}); %output Voronoi homogeneized but reduced x4
+                        model='3D_Centroids';
                     case 2
-                        [voronoiCyst]=getSegmentVoronoiFromApicalBasal(originalImage,labelledImage,embryoPath,fileName{1}); %output Voronoi homogeneized but reduced x4
+                        nCells=182;
+                        [voronoiEmbryo] = getSynthethicCyst_mask(segmentedImageResized,outPath,fileName{1}, nCells, 0.5);
+                        model='Random';
                     case 3
-                        nCells=298;
-                        [voronoiCyst] = getSynthethicCyst_mask(originalImage,segmentedImageResized,outPath,fileName{1}, nCells, 0.5);
+                        [voronoiEmbryo]=getSegmentVoronoiFromApicalBasal(segmentedImageResized,outPath,fileName{1}); %output Voronoi homogeneized but reduced x4    
+                        model='Segment Voronoi';
                 end
-            else
-                voronoiCyst=readStackTif(strcat(outPath,'\','voronoi_',fileName{1},'.tif'));
-                voronoiCyst=imresize3(double(voronoiCyst),([size(originalImage,1) size(originalImage,2) size(originalImage,3)*z_Scale]/4),'nearest');
-            end
-            [basalLayer,apicalLayer,lateralLayer,voronoiCyst]=getInnerOuterLateralFromEmbryos(outPath,fileName{1},voronoiCyst,1,0);
-            voronoiCystResized=imresize3(voronoiCyst,[size(originalImage,1:2) size(originalImage,3)*z_Scale],'nearest'); %Voronoi same size embryo
             
-            %select valid cells
-            [numberTotalCells,validCells,numberValidCells,~]=filterValidRegion(voronoiCystResized,pixel_Scale);
-% try
-%             load(strcat(outPath,'\',embryosFiles(nEmbryos).name,'\',fileName{1},'.mat'),'validCells')
-% catch
-% end
-            save(strcat(outPath,'\','voronoi_',fileName{1},'.mat'),'numberTotalCells','validCells','numberValidCells','basalLayer','apicalLayer','lateralLayer','voronoiCyst')
+            %% get inner, outer and lateral layers.    
+            voronoiEmbryoResized=imresize3(voronoiEmbryo,size(voronoiEmbryo)*4,'nearest'); %Voronoi same size embryo
+            [innerLayer,outerLayer,lateralLayer,~]=getInnerOuterLateralFromEmbryos(outPath,fileName{1},voronoiEmbryoResized,1,0);
+            
+            %% select valid region
+            [numberTotalCells,validCells,numberValidCells,~]=filterValidRegion(voronoiEmbryoResized,pixel_Scale);
+
+            %% save voronoi model, layers, valid region.
+            save(strcat(outPath,'\','voronoi_',fileName{1},'.mat'),'numberTotalCells','validCells','numberValidCells','innerLayer','outerLayer','lateralLayer','voronoiEmbryoResized','model')
         else
-            load(strcat(outPath,'\','voronoi_',fileName{1},'.mat'),'numberTotalCells','validCells','numberValidCells','basalLayer','apicalLayer','lateralLayer','voronoiCyst')
+            load(strcat(outPath,'\','voronoi_',fileName{1},'.mat'),'numberTotalCells','validCells','numberValidCells','innerLayer','outerLayer','lateralLayer','voronoiEmbryoResized')
         end
 
 

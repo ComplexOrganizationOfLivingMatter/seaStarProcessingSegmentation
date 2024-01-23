@@ -1,4 +1,4 @@
-function [homogeneizedVoronoiCyst] = getSynthethicCyst_mask(originalImage,labelledImage,outPath,fileName, nCells, minimumSeparation)
+function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,outPath,fileName, nCells, minimumSeparation)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % INPUTS
@@ -62,20 +62,19 @@ function [homogeneizedVoronoiCyst] = getSynthethicCyst_mask(originalImage,labell
     seeds_bw = imdilate(seeds_bw,se);
     
     %Voronoi from mask and seeds
-    voronoiCyst = VoronoizateCells(aux_mask,seeds_bw);
+    voronoiEmbryo = VoronoizateCells(aux_mask,seeds_bw);
     
     
     %resize and save
-    resizedVoronoiCyst=imresize3(voronoiCyst,size(originalImage),'nearest');
-    writeStackTif(uint16(resizedVoronoiCyst), strcat(outPath,'\','voronoi_',fileName,'.tif'));
+    writeStackTif(uint16(voronoiEmbryo), strcat(outPath,'\','voronoi_',fileName,'.tif'));
     
     %homogeneize throughout Lloyd algorithm
-    centroids = regionprops3(voronoiCyst, 'Centroid');
-    centroidSeeds = zeros(size(voronoiCyst));
-    uniqueLabels = unique(voronoiCyst);
+    centroids = regionprops3(voronoiEmbryo, 'Centroid');
+    centroidSeeds = zeros(size(voronoiEmbryo));
+    uniqueLabels = unique(voronoiEmbryo);
     
     % check that everything is ok
-    if length(uniqueLabels)~=length(unique(voronoiCyst))
+    if length(uniqueLabels)~=length(unique(voronoiEmbryo))
         warning('smth wrong with seeds');
     end
     
@@ -85,10 +84,10 @@ function [homogeneizedVoronoiCyst] = getSynthethicCyst_mask(originalImage,labell
     end
     
     se = strel('sphere',5);
-    homogeneizedVoronoiCyst = imdilate(centroidSeeds,se);
-    homogeneizedVoronoiCyst = VoronoizateCells(voronoiCyst>0, homogeneizedVoronoiCyst);
-    resizedHomogeneizedVoronoiCyst=imresize3(homogeneizedVoronoiCyst,size(originalImage),'nearest');
-    writeStackTif(uint16(resizedHomogeneizedVoronoiCyst), strcat(outPath,'\','homogeneizedVoronoi_',fileName,'.tif'));
+    homogeneizedVoronoiEmbryo = imdilate(centroidSeeds,se);
+    homogeneizedVoronoiEmbryo = VoronoizateCells(voronoiEmbryo>0, homogeneizedVoronoiEmbryo);
+%     resizedHomogeneizedvoronoiEmbryo=imresize3(homogeneizedvoronoiEmbryo,size(originalImage),'nearest');
+    writeStackTif(uint16(homogeneizedVoronoiEmbryo), strcat(outPath,'\','homogeneizedVoronoi_',fileName,'.tif'));
     
 end
 

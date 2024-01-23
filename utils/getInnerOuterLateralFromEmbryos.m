@@ -28,7 +28,7 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
         labelledImage_realSize  = imresize3(correctLabelledImage, [size(correctLabelledImage,1) size(correctLabelledImage,2) z_Scale*size(correctLabelledImage,3)], 'nearest');
         lateralLayer = zeros(size(labelledImage_realSize));
 
-        %% Step 2: Get Apical and Basal Layers
+        %% Step 2: Get Outer and Inner Layers
         binaryLabels = (labelledImage_realSize>0);
         binaryChunk = binaryLabels;
         %Voy hacer un troncho de valor 1 para 'rellenar' la parte superior del
@@ -49,17 +49,17 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
 
         % Dilate and compare labels
         se = strel('sphere',2);
-        dilatedApicalChunk = imdilate(innerChunk, se);
-        outerLayer = dilatedApicalChunk.*binaryLabels;
+        dilatedInnerChunk = imdilate(innerChunk, se);
+        innerLayer = dilatedInnerChunk.*binaryLabels;
 
-        % To get apical layer, make inverse matrix and repeat the process
+        % To get inner layer, make inverse matrix and repeat the process
         inverseBinaryChunk = ones(size(binaryChunk))-binaryChunk;
         se = strel('sphere',2);
         dilatedInverseBinaryChunk = imdilate(inverseBinaryChunk, se);
-        innerLayer = dilatedInverseBinaryChunk.*binaryLabels;
+        outerLayer = dilatedInverseBinaryChunk.*binaryLabels;
 
-        innerLayer = innerLayer.*labelledImage_realSize;
         outerLayer = outerLayer.*labelledImage_realSize;
+        innerLayer = innerLayer.*labelledImage_realSize;
 
         %% STEP 3: Get Lateral Layer and save information.
         totalCells = unique(labelledImage_realSize)';
@@ -67,7 +67,7 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
             perimLateralCell = bwperim(labelledImage_realSize==nCell);
             lateralLayer(perimLateralCell)=nCell;
         end
-        lateralLayer(outerLayer>0 | innerLayer>0) = 0;
+        lateralLayer(innerLayer>0 | outerLayer>0) = 0;
 
         if saveRequest==1
             save(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','outerLayer','innerLayer','lateralLayer', '-v7.3');

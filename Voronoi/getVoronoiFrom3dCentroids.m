@@ -1,7 +1,6 @@
-function [voronoiCyst]=getVoronoiFrom3dCentroids(originalImage,labelledImage,outPath,fileName)
+function [voronoiEmbryo]=getVoronoiFrom3dCentroids(labelledImage,outPath,fileName)
 
-if exist(strcat(outPath,'\','voronoi_',fileName,'.tif'),'file')~=2
-
+%work with smaller matrix
 labelledImage=imresize3(labelledImage,(size(labelledImage)/4),'nearest');
 
 %% specify mask
@@ -27,12 +26,9 @@ end
 
 seeds = bwlabeln(seedMatrix);
 
-%% make Voronoi
-voronoiCyst = VoronoizateCells(cellSpace,seeds);
+%% get Voronoi
+voronoiEmbryo = VoronoizateCells(cellSpace,seeds);
+%% save
+writeStackTif(uint16(voronoiEmbryo), strcat(outPath,'\','voronoi_',fileName,'.tif'));
 
-resizedVoronoiCyst=imresize3(voronoiCyst,size(originalImage),'nearest');
-writeStackTif(uint16(resizedVoronoiCyst), strcat(outPath,'\','voronoi_',fileName,'.tif'));
-else
-voronoiCyst=readStackTif(strcat(outPath,'\','voronoi_',fileName,'.tif'));
-voronoiCyst=imresize3(double(voronoiCyst),(size(labelledImage)/4),'nearest');
 end

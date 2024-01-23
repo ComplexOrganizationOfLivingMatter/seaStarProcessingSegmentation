@@ -1,4 +1,4 @@
-function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(labelledImage,apicalLayer,basalLayer,lateralLayer,path2save,fileName,dilatedVx,contactThreshold,validCells,pixel_Scale)
+function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(labelledImage,innerLayer,outerLayer,lateralLayer,path2save,fileName,dilatedVx,contactThreshold,validCells,pixel_Scale)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % calculateScutoidsAndSR
@@ -8,8 +8,8 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     % INPUTS: 
     %
     % labelledImage: segmented image
-    % apicalLayer: extracted from getInnerOuterLateralFromEmbryos
-    % basalLayer: extracted from getInnerOuterLateralFromEmbryos
+    % outerLayer: extracted from getInnerOuterLateralFromEmbryos
+    % innerLayer: extracted from getInnerOuterLateralFromEmbryos
     % lateralLayer: extracted from getInnerOuterLateralFromEmbryos
     % path2save: path to save the info
     % dilatedVx: dilatation of the cells to calculate neighbour per
@@ -27,6 +27,11 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     % surfaceRatio3D: Surface Ratio of each cell
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    %downsampling to optimize calculate 3D neighbours
+    outerLayerResized=imresize3(outerLayer,size(outerLayer)*4,'nearest');
+    innerLayerResized=imresize3(innerLayer,size(innerLayer)*4,'nearest');
+    lateralLayerResized=imresize3(lateralLayer,size(lateralLayer)*4,'nearest');
+    
     %defining all cells as valid cells
     if isempty(validCells)
         validCells = find(table2array(regionprops3(labelledImage,'Volume'))>0);
@@ -36,29 +41,29 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     %         dilatedVx = 2;
     %         contactThreshold=0.5;
 
-    [lateral3dInfo,totalLateralCellsArea,~] = getLateralContacts(lateralLayer,dilatedVx,contactThreshold);
+    [lateral3dInfo,totalLateralCellsArea,~] = getLateralContacts(lateralLayerResized,dilatedVx,contactThreshold);
 
     %% Cellular features
-    [apical3dInfo] = calculateNeighbours3D(apicalLayer, dilatedVx, apicalLayer == 0);
-    if size(apical3dInfo.neighbourhood,1) < size(lateral3dInfo',1)
-        for nCell=size(apical3dInfo.neighbourhood,1)+1:size(lateral3dInfo',1)
-            apical3dInfo.neighbourhood{nCell}=[];
+    [outer3dInfo] = calculateNeighbours3D(outerLayerResized, dilatedVx, outerLayerResized == 0);
+    if size(outer3dInfo.neighbourhood,1) < size(lateral3dInfo',1)
+        for nCell=size(outer3dInfo.neighbourhood,1)+1:size(lateral3dInfo',1)
+            outer3dInfo.neighbourhood{nCell}=[];
         end
-    elseif size(apical3dInfo.neighbourhood,1) > size(lateral3dInfo',1)
-        apical3dInfo.neighbourhood=apical3dInfo.neighbourhood(1:size(lateral3dInfo,2),1);
+    elseif size(outer3dInfo.neighbourhood,1) > size(lateral3dInfo',1)
+        outer3dInfo.neighbourhood=outer3dInfo.neighbourhood(1:size(lateral3dInfo,2),1);
     end
-    apical3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo,apical3dInfo.neighbourhood','UniformOutput',false);
+    outer3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo,outer3dInfo.neighbourhood','UniformOutput',false);
 
-    [basal3dInfo] = calculateNeighbours3D(basalLayer, dilatedVx, basalLayer == 0);
-    if size(basal3dInfo.neighbourhood,1) < size(lateral3dInfo',1)
-        for nCell=size(basal3dInfo.neighbourhood,1)+1:size(lateral3dInfo',1)
-            basal3dInfo.neighbourhood{nCell}=[];
+    [inner3dInfo] = calculateNeighbours3D(innerLayerResized, dilatedVx, innerLayerResized == 0);
+    if size(inner3dInfo.neighbourhood,1) < size(lateral3dInfo',1)
+        for nCell=size(inner3dInfo.neighbourhood,1)+1:size(lateral3dInfo',1)
+            inner3dInfo.neighbourhood{nCell}=[];
         end
 
-    elseif size(basal3dInfo.neighbourhood,1) > size(lateral3dInfo',1)
-        basal3dInfo.neighbourhood=basal3dInfo.neighbourhood(1:size(lateral3dInfo,2),1);
+    elseif size(inner3dInfo.neighbourhood,1) > size(lateral3dInfo',1)
+        inner3dInfo.neighbourhood=inner3dInfo.neighbourhood(1:size(lateral3dInfo,2),1);
     end
-    basal3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo,basal3dInfo.neighbourhood','UniformOutput',false);
+    inner3dInfo = cellfun(@(x,y) intersect(x,y),lateral3dInfo,inner3dInfo.neighbourhood','UniformOutput',false);
 
     %check for non considered valid cells, and delete cells "0" volume
     missingCells = find(totalLateralCellsArea==0);
@@ -74,17 +79,15 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     validCells=validCells';
 
 
-    neighbours_data = table(apical3dInfo, basal3dInfo, lateral3dInfo);
-    neighbours_data.Properties.VariableNames = {'Apical','Basal','Lateral'};
+    neighbours_data = table(outer3dInfo, inner3dInfo, lateral3dInfo);
+    neighbours_data.Properties.VariableNames = {'Outer','Inner','Lateral'};
 
     %%  Calculate surface ratio
-    apicalLayerResized=imresize3(apicalLayer,size(apicalLayer)*4,'nearest');
-    basalLayerResized=imresize3(basalLayer,size(basalLayer)*4,'nearest');
-    apical_area_cells=cell2mat(struct2cell(regionprops(apicalLayerResized,'Area'))).';
-    basal_area_cells=cell2mat(struct2cell(regionprops(basalLayerResized,'Area'))).';
+    outer_area_cells=cell2mat(struct2cell(regionprops(outerLayer,'Area'))).';
+    inner_area_cells=cell2mat(struct2cell(regionprops(innerLayer,'Area'))).';
 
-    outerArea=sum(basal_area_cells(validCells));
-    innerArea=sum(apical_area_cells(validCells));
+    outerArea=sum(outer_area_cells(validCells)*pixel_Scale^2);
+    innerArea=sum(inner_area_cells(validCells)*pixel_Scale^2);
     surfaceRatio3D = outerArea / innerArea;
 
     %%  Determine if a cell is a scutoid or not
@@ -92,9 +95,9 @@ function [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]
     scutoids_cells = double(apicoBasalTransitions>0);
 
     %% Filter Scutoids
-    [scutoids_cells,apical3dInfo,basal3dInfo,~] = filterScutoids(neighbours_data.Apical, neighbours_data.Basal, neighbours_data.Lateral, scutoids_cells,validCells);
+    [scutoids_cells,outer3dInfo,inner3dInfo,~] = filterScutoids(neighbours_data.Outer, neighbours_data.Inner, neighbours_data.Lateral, scutoids_cells,validCells);
     %% Correct apicoBasalTransitions
-    apicoBasalTransitions = cellfun(@(x, y) unique(vertcat(setdiff(y,x), setdiff(x,y))), apical3dInfo,basal3dInfo,'UniformOutput',false);
+    apicoBasalTransitions = cellfun(@(x, y) unique(vertcat(setdiff(y,x), setdiff(x,y))), outer3dInfo,inner3dInfo,'UniformOutput',false);
 
     validScutoids_cells=scutoids_cells(validCells);
     disp(mean(validScutoids_cells))
