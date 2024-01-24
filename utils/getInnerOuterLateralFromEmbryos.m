@@ -45,12 +45,12 @@ function [innerLayer,outerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
         end
 
         binaryChunk = imfill(binaryChunk, 'holes');
-        innerChunk = binaryChunk - binaryLabels;
+        outerChunk = binaryChunk - binaryLabels;
 
         % Dilate and compare labels
         se = strel('sphere',2);
-        dilatedInnerChunk = imdilate(innerChunk, se);
-        outerLayer = dilatedInnerChunk.*binaryLabels;
+        dilatedOuterChunk = imdilate(outerChunk, se);
+        outerLayer = dilatedOuterChunk.*binaryLabels;
 
         % To get inner layer, make inverse matrix and repeat the process
         inverseBinaryChunk = ones(size(binaryChunk))-binaryChunk;
