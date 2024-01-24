@@ -1,4 +1,4 @@
-function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOuterLateralFromEmbryos(segmentedPath,fileName,correctLabelledImage,z_Scale,saveRequest)
+function [innerLayer,outerLayer,lateralLayer,labelledImage_realSize]=getInnerOuterLateralFromEmbryos(segmentedPath,fileName,correctLabelledImage,z_Scale,saveRequest)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % getInnerOuterLateralFromEmbryos
     % Function to extract the needed info for 
@@ -50,16 +50,16 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
         % Dilate and compare labels
         se = strel('sphere',2);
         dilatedInnerChunk = imdilate(innerChunk, se);
-        innerLayer = dilatedInnerChunk.*binaryLabels;
+        outerLayer = dilatedInnerChunk.*binaryLabels;
 
         % To get inner layer, make inverse matrix and repeat the process
         inverseBinaryChunk = ones(size(binaryChunk))-binaryChunk;
         se = strel('sphere',2);
         dilatedInverseBinaryChunk = imdilate(inverseBinaryChunk, se);
-        outerLayer = dilatedInverseBinaryChunk.*binaryLabels;
+        innerLayer = dilatedInverseBinaryChunk.*binaryLabels;
 
-        outerLayer = outerLayer.*labelledImage_realSize;
         innerLayer = innerLayer.*labelledImage_realSize;
+        outerLayer = outerLayer.*labelledImage_realSize;
 
         %% STEP 3: Get Lateral Layer and save information.
         totalCells = unique(labelledImage_realSize)';
@@ -67,7 +67,7 @@ function [outerLayer,innerLayer,lateralLayer,labelledImage_realSize]=getInnerOut
             perimLateralCell = bwperim(labelledImage_realSize==nCell);
             lateralLayer(perimLateralCell)=nCell;
         end
-        lateralLayer(innerLayer>0 | outerLayer>0) = 0;
+        lateralLayer(outerLayer>0 | innerLayer>0) = 0;
 
         if saveRequest==1
             save(fullfile(segmentedPath,'realSize3dLayers.mat'), 'labelledImage_realSize','outerLayer','innerLayer','lateralLayer', '-v7.3');
