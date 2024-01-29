@@ -1,5 +1,14 @@
 # seaStarProcessingSegmentation
-![RepositoryPresentation](https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/images/randomColorSeaStar.gif)
+
+<p align="center">
+  <img width="1200"  src="https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/blob/main/images/showing-test_tree-test_FeatNorm_test.png" alt="Imagen 1">
+</p>
+<p align="center">
+  <img width="500" src="https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/blob/main/images/randomColorSeaStar.gif" alt="Imagen 2">
+</p>
+
+
+
 
 ## Main codes
 
