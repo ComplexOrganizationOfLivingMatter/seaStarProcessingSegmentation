@@ -178,8 +178,6 @@ Documentation can be found inside the .m files.
 
 ## cartoStar
 
-![RepositoryPresentation](https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/images/showing-test_tree-test_FeatNorm_test.png)
-
 codes inside: 
 seaStarProcessingSegmentation/cartoStar
 
