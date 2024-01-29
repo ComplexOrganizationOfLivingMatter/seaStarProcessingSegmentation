@@ -1,5 +1,5 @@
 # seaStarProcessingSegmentation
-![RepositoryPresentation](https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/main/images/segmentedSeaStarWt.gif)
+![RepositoryPresentation](https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/images/randomColorSeaStar.gif)
 
 ## Main codes
 
@@ -168,6 +168,8 @@ General useful codes.
 Documentation can be found inside the .m files.
 
 ## cartoStar
+
+![RepositoryPresentation](https://github.com/ComplexOrganizationOfLivingMatter/seaStarProcessingSegmentation/images/showing-test_tree-test_FeatNorm_test.png)
 
 codes inside: 
 seaStarProcessingSegmentation/cartoStar
