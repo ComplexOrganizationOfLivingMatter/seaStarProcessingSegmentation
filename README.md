@@ -163,8 +163,18 @@ Documentation can be found inside the .m files.
 
 codes inside: 
 seaStarProcessingSegmentation/utils
-
 General useful codes.
 
 Documentation can be found inside the .m files.
 
+## cartoStar
+
+codes inside: 
+seaStarProcessingSegmentation/cartoStar
+
+Codes for cartographic representation of sea star features.
+
+Main code is "cartoStar.m". The output of this code consists of two images, one in BMP format and another in PNG format.
+These images represent: sea star top (random colors), sea star bottom (random colors),
+sea star bottom (colored based on volume), sea star bottom (colored based on solidity),
+sea star bottom (colored if scutoid).
