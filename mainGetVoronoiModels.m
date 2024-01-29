@@ -50,7 +50,7 @@ for nEmbryos=1:length(embryosFiles)
         
         %Quantify scutoids
         dilatedVx=2;
-        contactThreshold=3;
+        contactThreshold=1;
         disp(numberTotalCells)
         [scutoids_cells,validScutoids_cells,outerArea,innerArea,surfaceRatio3D]=calculateScutoidsAndSR(voronoiCyst,innerLayer,outerLayer,lateralLayer,embryoPath,fileName{1},dilatedVx,contactThreshold,validCells,pixel_Scale); %input Voronoi homogeneised and reduced x4
         generalInfo= cell2table([{fileName(1)}, {surfaceRatio3D}, {numberValidCells},{numberTotalCells},{mean(scutoids_cells)},{mean(validScutoids_cells)},{outerArea},{innerArea}],'VariableNames', {'ID_Tissue', 'SurfaceRatio3D_areas', 'NCells_valid','NCells_total','Scutoids','valid_Scutoids','outer_Area','inner_Area'});
