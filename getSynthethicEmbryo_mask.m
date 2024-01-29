@@ -15,33 +15,50 @@ function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,ou
     
     aux_mask = mask;
     
-    
-    se = strel('sphere',8);                             %% PARAMETER
-    mask = imerode(mask, se);
-    
-    %     nCells = 269;                                       %% PARAMETER
-    
+    xyproject = sum(mask, 3);
+    xyproject = xyproject>5; %% JUST TO ENSURE THAT THERE'S NOTA SINGLE DOT. ITS AT LEAT 6PX TALL CELL
+%     %% SACO INNER LAYER Y OUTER LAYER
+
+    centerAccuracy = 5; %Esto da un +- respecto de como de centrao en el tejido quieres la seed. 5 es un 2.5 parriba, 2.5 pabajo respecto al centro.
+
+%     nCells = 269;                                       %% PARAMETER
+%     
     % xyz positions inside mask
-    [x,y,z] = ind2sub(size(mask),find(mask==1));
+    [x,y] = ind2sub(size(xyproject),find(xyproject==1));
     seeds = [];
     seedMatrix = zeros(size(mask));
-    minimumSeparation = 10; %% half of the cell height? ? ?   %% PARAMETER
+%     minimumSeparation = 10; %% half of the cell height? ? ?   %% PARAMETER
     
     iters = size(x, 1);
     
     % locate random seeds and check if it's inside the mask
     for i = 1:iters
         randomDotIx = round(rand(1)*size(x, 1));
+        
         if randomDotIx == 0
             randomDotIx = randomDotIx+1;
         end
-        randomDot = [x(randomDotIx), y(randomDotIx), z(randomDotIx)];
+        randomDot = [x(randomDotIx), y(randomDotIx)];
         x(randomDotIx) = [];
         y(randomDotIx) = [];
-        z(randomDotIx) = [];
+        
+        first1 = find(mask(randomDot(1), randomDot(2), :), 1, 'first');
+        last1 = find(mask(randomDot(1), randomDot(2), :), 1, 'last');
+                
+        randomDotZ = round((first1+last1)/2);
+        randomDotZ = round(randomDotZ+(-0.5+rand(1))*centerAccuracy);
+        
+        randomDot = [randomDot(1), randomDot(2), randomDotZ];
+        
+
+        
+        
         if isempty(seeds)
             seeds = [seeds;randomDot];
         end
+        
+
+
         if min(pdist2(randomDot,seeds)) <= minimumSeparation
             continue
         else
@@ -52,7 +69,7 @@ function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,ou
         if size(seeds,1)==nCells
             break
         end
-        
+            
     end
     
     %%
@@ -63,7 +80,6 @@ function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,ou
     
     %Voronoi from mask and seeds
     voronoiEmbryo = VoronoizateCells(aux_mask,seeds_bw);
-    
     
     %resize and save
     writeStackTif(uint16(voronoiEmbryo), strcat(outPath,'\','voronoi_',fileName,'.tif'));
