@@ -4,7 +4,9 @@ function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,ou
     % INPUTS
     % mask: binary image where seeds will be located
     % nCells: Number of cells
-    % minimumSeparation: Percentage of cellHeight between the 2 closest
+    % centerAccuracy: allowed Z variation in the seed position
+    % minimumSeparation: Percentage of cellHeight between the 2 closest.
+    % 5 means 2.5 range both up and down.
     % seeds. PIXELS, NOT PERCENTAGE.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -17,9 +19,8 @@ function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,ou
     
     xyproject = sum(mask, 3);
     xyproject = xyproject>5; %% JUST TO ENSURE THAT THERE'S NOTA SINGLE DOT. ITS AT LEAT 6PX TALL CELL
-%     %% SACO INNER LAYER Y OUTER LAYER
-
-    centerAccuracy = 5; %Esto da un +- respecto de como de centrao en el tejido quieres la seed. 5 es un 2.5 parriba, 2.5 pabajo respecto al centro.
+    
+    centerAccuracy = 5; 
 
 %     nCells = 269;                                       %% PARAMETER
 %     
@@ -27,7 +28,7 @@ function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,ou
     [x,y] = ind2sub(size(xyproject),find(xyproject==1));
     seeds = [];
     seedMatrix = zeros(size(mask));
-%     minimumSeparation = 10; %% half of the cell height? ? ?   %% PARAMETER
+%     minimumSeparation = 10; %% half of the cell height seems to work nice   %% PARAMETER
     
     iters = size(x, 1);
     
@@ -49,16 +50,11 @@ function [homogeneizedVoronoiEmbryo] = getSynthethicEmbryo_mask(labelledImage,ou
         randomDotZ = round(randomDotZ+(-0.5+rand(1))*centerAccuracy);
         
         randomDot = [randomDot(1), randomDot(2), randomDotZ];
-        
-
-        
-        
+    
         if isempty(seeds)
             seeds = [seeds;randomDot];
         end
         
-
-
         if min(pdist2(randomDot,seeds)) <= minimumSeparation
             continue
         else
