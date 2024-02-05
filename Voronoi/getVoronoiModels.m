@@ -54,12 +54,12 @@ function [numberTotalCells,validCells,numberValidCells,innerLayer,outerLayer,lat
                         [voronoiEmbryo]=getVoronoiFrom3dCentroids(segmentedImageResized,outPath,fileName{1}); %output Voronoi homogeneized but reduced x4
                         model='3D_Centroids';
                     case 2
-                        nCells=230;
+                        nCells=180;
                         [voronoiEmbryo] = getSynthethicEmbryo_mask(segmentedImageResized,outPath,fileName{1}, nCells, 10);
-                        model='Random';
-                    case 3
-                        [voronoiEmbryo]=getSegmentVoronoiFromApicalBasal(segmentedImageResized,outPath,fileName{1}); %output Voronoi homogeneized but reduced x4    
-                        model='Segment Voronoi';
+                        model='Homogeneous Seeds';
+%                     case 3
+%                         [voronoiEmbryo]=getSegmentVoronoiFromApicalBasal(segmentedImageResized,outPath,fileName{1}); %output Voronoi homogeneized but reduced x4    
+%                         model='Segment Voronoi';
                 end
             
             %% get inner, outer and lateral layers.    

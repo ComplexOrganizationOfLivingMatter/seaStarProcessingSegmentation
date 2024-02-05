@@ -34,7 +34,10 @@ embryosFiles = subDirs(3:end);
 
 % Select which type of Voronoi model you want to make from embryos
 % segmented regions.
-[indx,~] = listdlg('PromptString',{'Select a mode'},'SelectionMode','single','ListString',{'3D Centroids','RandomSeeds','SegmentVoronoi'});
+[indx,~] = listdlg('PromptString',{'Select a mode'},'SelectionMode','single','ListString',{'3D Centroids','Homogeneous Seeds'});
+
+% [indx,~] = listdlg('PromptString',{'Select a mode'},'SelectionMode','single','ListString',{'3D Centroids','RandomSeeds','SegmentVoronoi'});
+
 
 for nEmbryos=1:length(embryosFiles)
     segmentedEmbryosFiles = dir(strcat(embryosFiles(nEmbryos).folder,'\',embryosFiles(nEmbryos).name,'\segmentedImages\*.tif*'));
