@@ -63,11 +63,11 @@ fullPathTo\SeaStarSegmentations <br />
 └── <br />
 
 
-### mainVoronoiPacking
+### mainGetVoronoiModels
 
 Main code for whole voronoi packing processing for comparing voronoi models against
 real data.
-Uses makeVoronoiPacking function
+Uses getVoronoiModels function
 
 User must change some paths.
 
@@ -139,11 +139,11 @@ Note: There is two major axis columns since we assume oblate embryoids.
 codes inside: 
 seaStarProcessingSegmentation/Voronoi/
 
-### MakeVoronoiModels
+### GetVoronoiModels
 
 Function to make voronoi tesselations from centroids of image
 segmentations. It is used to compare voronoi models with real data.
-This function is called from seaStarProcessingSegmentation/mainVoronoiPacking <br />
+This function is called from seaStarProcessingSegmentation/maiGetVoronoiModels <br />
 #### INPUTS: <br />
 originalImage: raw image <br />
 labelledImage: segmented image <br />
